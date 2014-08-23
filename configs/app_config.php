@@ -146,6 +146,5 @@ class WI_CONFIG{
      */
     public static $routes = array(
         '/'=>array('default','index'),
-	'/demo/(?P<type>get|info|findall)'=>array('default','demo'),
     );
  }
