@@ -3,7 +3,7 @@ WIF
 
 WI PHP Framework
 
-WIF 是一个轻量的PHP框架，只包含了简单的php架构。
+WIF 是一个轻量的PHP框架。
 
 特性如下：
 1. 简单MVC架构
