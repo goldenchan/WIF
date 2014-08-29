@@ -14,21 +14,20 @@ class WI_HttpClient extends SnoopyCurl
 {
 	function WI_HttpClient()
 	{
-		global $_WI_CONFIG;
-		if(isset($_WI_CONFIG['httpclient'])){
-			$this->proxy_host = $_WI_CONFIG['httpclient']['proxy_host'];
-			$this->proxy_port = $_WI_CONFIG['httpclient']['proxy_port'];
-			$this->proxy_user = $_WI_CONFIG['httpclient']['proxy_user'];
-			$this->proxy_pass = $_WI_CONFIG['httpclient']['proxy_pass'];
-			$this->agent	  = $_WI_CONFIG['httpclient']['agent'];
-			$this->read_timeout = $_WI_CONFIG['httpclient']['read_timeout'];
-			$this->_fp_timeout = $_WI_CONFIG['httpclient']['exec_timeout'];
+		if(isset(WI_CONFIG::$httpclient)){
+			$this->proxy_host = WI_CONFIG::$httpclient['proxy_host'];
+			$this->proxy_port = WI_CONFIG::$httpclient['proxy_port'];
+			$this->proxy_user = WI_CONFIG::$httpclient['proxy_user'];
+			$this->proxy_pass = WI_CONFIG::$httpclient['proxy_pass'];
+			$this->agent	  = WI_CONFIG::$httpclient['agent'];
+			$this->read_timeout = WI_CONFIG::$httpclient['read_timeout'];
+			$this->_fp_timeout = WI_CONFIG::$httpclient['exec_timeout'];
 		}
 		else
 		{
 			$this->agent	  = 'HttpClient 1.0';
 			$this->read_timeout = 30;
-			$this->_fp_timeout = 0;
+			$this->_fp_timeout = 30;
 			//trigger_error('HttpClient: use default config',E_USER_NOTICE);
 		}
 	}

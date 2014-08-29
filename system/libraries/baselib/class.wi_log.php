@@ -17,7 +17,6 @@ class WI_Log
 	function WI_Log($handler=null, $name = '', $ident = '', $conf = array(),
                         $level = PEAR_LOG_DEBUG)
 	{
-		global $_WI_CONFIG;
 		if(!empty($handler)){
 			$this->logger = &Log::singleton(
 				$handler,
@@ -26,14 +25,14 @@ class WI_Log
 				$conf,
 				$level);
 		}
-		elseif(isset($_WI_CONFIG['log']))
+		elseif(isset(WI_CONFIG::$log))
 		{
 			$this->logger = &Log::singleton(
-				$_WI_CONFIG['log']['handler'],
-				$_WI_CONFIG['log']['name'],
-				$_WI_CONFIG['log']['ident'],
-				$_WI_CONFIG['log']['conf'],
-				$_WI_CONFIG['log']['level']);
+				WI_CONFIG::$log['handler'],
+				WI_CONFIG::$log['name'],
+				WI_CONFIG::$log['ident'],
+				WI_CONFIG::$log['conf'],
+				WI_CONFIG::$log['level']);
 		}
 		else
 		{
