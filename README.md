@@ -14,6 +14,7 @@ WI PHP Framework
 6. View 层支持第三方模版引擎,默认为 Smarty 模版引擎
 
 ### 目录结构：
+.
 |-- application
 |   |-- cli
 |   |-- controllers
