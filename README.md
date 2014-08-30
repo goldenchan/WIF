@@ -14,43 +14,43 @@ WI PHP Framework
 6. View 层支持第三方模版引擎,默认为 Smarty 模版引擎
 
 ### 目录结构：
-├── application
-│   ├── cli
-│   ├── controllers
-│   ├── files
-│   ├── helpers
-│   ├── langs
-│   ├── logs
-│   ├── models
-│   ├── templates
-│   │   └── default
-│   │       └── default
-│   ├── tmp
-│   │   ├── cache
-│   │   ├── persistent
-│   │   └── templates_c
-│   └── vendor
-├── configs
-├── public
-│   └── resources
-│       ├── css
-│       ├── icon
-│       ├── img
-│       └── js
-└── system
-    ├── cores
-    └── libraries
-        ├── baselib
-        │   ├── Image
-        │   │   └── Resizer
-        │   ├── Log
-        │   │   └── Log
-        │   ├── Mailer
-        │   │   └── language
-        │   ├── Memcache
-        │   ├── Smarty
-        │   │   ├── plugins
-        │   │   └── sysplugins
-        │   ├── Snoopy
-        │   └── ez_sql
-        └── cache
+|-- application
+|   |-- cli
+|   |-- controllers
+|   |-- files
+|   |-- helpers
+|   |-- langs
+|   |-- logs
+|   |-- models
+|   |-- templates
+|   |   `-- default
+|   |       `-- default
+|   |-- tmp
+|   |   |-- cache
+|   |   |-- persistent
+|   |   `-- templates_c
+|   `-- vendor
+|-- configs
+|-- public
+|   `-- resources
+|       |-- css
+|       |-- icon
+|       |-- img
+|       `-- js
+`-- system
+    |-- cores
+    `-- libraries
+        |-- baselib
+        |   |-- Image
+        |   |   `-- Resizer
+        |   |-- Log
+        |   |   `-- Log
+        |   |-- Mailer
+        |   |   `-- language
+        |   |-- Memcache
+        |   |-- Smarty
+        |   |   |-- plugins
+        |   |   `-- sysplugins
+        |   |-- Snoopy
+        |   `-- ez_sql
+        `-- cache
