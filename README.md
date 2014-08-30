@@ -16,42 +16,42 @@ WI PHP Framework
 ### 目录结构：
     .
     |-- application
-    |   |-- cli
-    |   |-- controllers
-    |   |-- files
-    |   |-- helpers
-    |   |-- langs
-    |   |-- logs
-    |   |-- models
-    |   |-- templates
-    |   |   `-- default
-    |   |       `-- default
-    |   |-- tmp
-    |   |   |-- cache
-    |   |   |-- persistent
-    |   |   `-- templates_c
-    |   `-- vendor
-    |-- configs
-    |-- public
-    |   `-- resources
+    |   |-- cli  命令行目录
+    |   |-- controllers 控制器目录
+    |   |-- files   用户文件目录
+    |   |-- helpers 帮助器类目录
+    |   |-- langs   国际化文件
+    |   |-- logs    日志文件
+    |   |-- models  模型文件目录
+    |   |-- templates 模版目录
+    |   |   `-- default 主题目录
+    |   |       `-- default 默认控制器
+    |   |-- tmp 临时目录        
+    |   |   |-- cache 文件缓存目录
+    |   |   |-- persistent 持久化缓存目录
+    |   |   `-- templates_c 模版编译目录
+    |   `-- vendor 第三方库目录
+    |-- configs 配置文件目录
+    |-- public webroot目录
+    |   `-- resources 资源目录
     |       |-- css
     |       |-- icon
     |       |-- img
     |       `-- js
-    `-- system
-        |-- cores
-        `-- libraries
-            |-- baselib
-            |   |-- Image
-            |   |   `-- Resizer
-            |   |-- Log
+    `-- system 系统目录
+        |-- cores 核心文件目录
+        `-- libraries 系统库
+            |-- baselib 基本库
+            |   |-- Image 图片处理类
+            |   |   `-- Resizer 
+            |   |-- Log 日志处理类
             |   |   `-- Log
-            |   |-- Mailer
+            |   |-- Mailer 邮件处理类
             |   |   `-- language
-            |   |-- Memcache
-            |   |-- Smarty
+            |   |-- Memcache memcache类
+            |   |-- Smarty smarty类
             |   |   |-- plugins
             |   |   `-- sysplugins
-            |   |-- Snoopy
-            |   `-- ez_sql
-            `-- cache
+            |   |-- Snoopy snoopy类
+            |   `-- ez_sql ez_sql类
+            `-- cache 缓存处理类
