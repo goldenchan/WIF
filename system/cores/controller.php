@@ -57,7 +57,7 @@ abstract class Controller {
      * 实例化后的helper对象
      * @var array
      */
-	protected $helper_objects = array();
+       protected $helper_objects = array();
 	
     /**
      * 模版主题
@@ -210,20 +210,11 @@ abstract class Controller {
         //router_params数据从Router中取
         $this->router_params = Router::$params;
 
-        ini_set('magic_quotes_runtime', 0);
-        if( isset($_POST)){
-            ini_get('magic_quotes_gpc') && $_POST = stripslashes_deep($_POST);//$_POST处理
-            $this->post_data = $_POST;
-        }
+        $this->post_data = $_POST;
 
-        if( isset($_GET) ){
-            ini_get('magic_quotes_gpc') && $_GET = stripslashes_deep($_GET);//$_GET处理
-            $this->params_data = $_GET;
-        }
+        $this->params_data = $_GET;
 
-        if( isset($_FILES) ){
-            $this->post_files = $_FILES; //$_FILES处理
-        }
+       $this->post_files = $_FILES; //$_FILES处理
 
         //初始化模版主题
         $this->tpl_theme = WI_CONFIG::$default_template_theme;

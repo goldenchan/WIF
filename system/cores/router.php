@@ -204,7 +204,7 @@ class Router
                     $matched_route = TRUE;
                     
                     // Parameters to pass to the callback function
-                    $params = array( $this->url_clean );
+                    $params = array("_URL"=> $this->url_clean );
                     
                     // Get any named parameters from the route
                     foreach ( $matches as $key => $match ) {
@@ -212,6 +212,14 @@ class Router
                             $params[$key] = trim( $match, '/' );
                         }
                     }
+		    
+		    ini_set('magic_quotes_runtime', 0);
+                    ini_get('magic_quotes_gpc') && !empty($_POST) && $_POST = stripslashes_deep($_POST);//$_POST处理
+                    $params['_POST'] = $_POST;
+
+                    ini_get('magic_quotes_gpc') && !empty($_GET) && $_GET = stripslashes_deep($_GET);//$_GET处理
+                    $params['_GET'] = $_GET;
+                    $params['_FILES'] = $_FILES;
                     
                     // Store the parameters and callback function to execute later
                     self::$params = $params;
@@ -253,7 +261,7 @@ class Router
             throw new Exception( 'No callback or parameters found, please run $router->run() before $router->dispatch()' );
             return FALSE;
         }
-		//hack by chenjin 20130317 check if the router is for the controller class 
+	//hack by chenjin 20130317 check if the router is for the controller class 
         self::$controller = $this->callback[0];
         self::$action = $this->callback[1];
         $this->callback[0] .= "_Controller";
@@ -262,8 +270,11 @@ class Router
         //$this->callback = array($class,self::$action);
         //$this->callback[0] = $class;
 		
-		call_user_func_array( array(new $this->callback[0],$this->callback[1]), array(self::$params) );
-		return TRUE;
+	$function_return = call_user_func_array( array(new $this->callback[0],$this->callback[1]), array(self::$params) );
+        if(isset($function_return)){//如果有非对象的return，直接输出
+            echo !is_scalar($function_return)  ? json_encode($function_return,JSON_UNESCAPED_UNICODE) : $function_return;
+        }
+	return TRUE;
 
     }
     
