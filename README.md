@@ -15,44 +15,42 @@ WIF 是一个轻量的PHP框架。
 .
 目录结构：
 ├── application
-│   ├── cli
-│   ├── controllers
-│   ├── files
-│   ├── helpers
-│   ├── langs
-│   ├── logs
-│   ├── models
-│   ├── templates
-│   │   └── default
-│   │       └── default
-│   ├── tmp
-│   │   ├── cache
-│   │   ├── persistent
-│   │   └── templates_c
-│   └── vendor
+│   ├── cli
+│   ├── controllers
+│   ├── files
+│   ├── helpers
+│   ├── langs
+│   ├── logs
+│   ├── models
+│   ├── templates
+│   │   └── default
+│   │       └── default
+│   ├── tmp
+│   │   ├── cache
+│   │   ├── persistent
+│   │   └── templates_c
+│   └── vendor
 ├── configs
 ├── public
-│   └── resources
-│       ├── css
-│       ├── icon
-│       ├── img
-│       └── js
+│   └── resources
+│       ├── css
+│       ├── icon
+│       ├── img
+│       └── js
 └── system
     ├── cores
     └── libraries
         ├── baselib
-        │   ├── Image
-        │   │   └── Resizer
-        │   ├── Log
-        │   │   └── Log
-        │   ├── Mailer
-        │   │   └── language
-        │   ├── Memcache
-        │   ├── Smarty
-        │   │   ├── plugins
-        │   │   └── sysplugins
-        │   ├── Snoopy
-        │   └── ez_sql
+        │   ├── Image
+        │   │   └── Resizer
+        │   ├── Log
+        │   │   └── Log
+        │   ├── Mailer
+        │   │   └── language
+        │   ├── Memcache
+        │   ├── Smarty
+        │   │   ├── plugins
+        │   │   └── sysplugins
+        │   ├── Snoopy
+        │   └── ez_sql
         └── cache
-
-40 directories
