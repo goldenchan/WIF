@@ -1,17 +1,16 @@
 <?php
 /**
-* http 缓存类 
-* @file http_cache.php
-* @package tempalte 
-* @author 陈金(wind.golden@gmail.com)
-*/		
-
+ * http 缓存类
+ * @file http_cache.php
+ * @package tempalte
+ * @author 陈金(wind.golden@gmail.com)
+ */
 //In RSS/ATOM feedMode, contains the date of the clients last update.
-$clientCacheDate=0; //Global public variable because PHP4 does not allow conditional arguments by reference
-$_sessionMode=false; //Global private variable
+$clientCacheDate = 0; //Global public variable because PHP4 does not allow conditional arguments by reference
+$_sessionMode = false; //Global private variable
 
 /**
- * http cache 处理类 
+ * http cache 处理类
  * Enable support for HTTP/1.x conditional requests in PHP.
  * Goal: Optimisation
  * - If the client sends a HEAD request, avoid transferring data and return the correct headers.
@@ -33,7 +32,7 @@ $_sessionMode=false; //Global private variable
  *  Returns: True if the connection can be closed (e.g.: the client has already the lastest version), false if the new content has to be send to the client.
  *
  * Typical use:
- * 
+ *
  *  require('http-conditional.php');
  *  //Date of the last modification of the content (Unix Timestamp format).
  *  //Examples: query the database, or last modification of a static file.
@@ -45,7 +44,7 @@ $_sessionMode=false; //Global private variable
  *  }
  *  //Do not send any text to the client before this line.
  *  ... //Rest of the script, just as you would do normally.
- * 
+ *
  *
  * Version 1.6.1, 2005-04-03, http://alexandre.alapetite.net/doc-alex/php-http-304/
  *
@@ -72,161 +71,135 @@ class Http_Cache {
      * @param integer $UnixTimeStamp last modified unix 时间戳
      * @param integer $cacheSeconds 缓存秒数
      * @param integer $cachePrivacy privacy
-     * @param boolean $feedMode 
+     * @param boolean $feedMode
      * @param boolean $compression 是否压缩
-     * @param bollean $session etag 是否加上session信息 
+     * @param bollean $session etag 是否加上session信息
      * @return boolean true or false
      */
-    static function httpConditional($UnixTimeStamp,$cacheSeconds=0,
-                             $cachePrivacy=0,$feedMode=false,
-                             $compression=false,$session=false){
-            //Credits: http://alexandre.alapetite.net/doc-alex/php-http-304/
-            //RFC2616 HTTP/1.1: http://www.w3.org/Protocols/rfc2616/rfc2616.html
-            //RFC1945 HTTP/1.0: http://www.w3.org/Protocols/rfc1945/rfc1945.txt
-
+    static function httpConditional($UnixTimeStamp, $cacheSeconds = 0, $cachePrivacy = 0, $feedMode = false, $compression = false, $session = false) {
+        //Credits: http://alexandre.alapetite.net/doc-alex/php-http-304/
+        //RFC2616 HTTP/1.1: http://www.w3.org/Protocols/rfc2616/rfc2616.html
+        //RFC1945 HTTP/1.0: http://www.w3.org/Protocols/rfc1945/rfc1945.txt
         if (headers_sent()) return false;
-
-        if (isset($_SERVER['SCRIPT_FILENAME'])) $scriptName=$_SERVER['SCRIPT_FILENAME'];
-        elseif (isset($_SERVER['PATH_TRANSLATED'])) $scriptName=$_SERVER['PATH_TRANSLATED'];
+        if (isset($_SERVER['SCRIPT_FILENAME'])) $scriptName = $_SERVER['SCRIPT_FILENAME'];
+        elseif (isset($_SERVER['PATH_TRANSLATED'])) $scriptName = $_SERVER['PATH_TRANSLATED'];
         else return false;
-
-        if ((!$feedMode)&&(($modifScript=filemtime($scriptName))>$UnixTimeStamp))
-            $UnixTimeStamp=$modifScript;
-        $UnixTimeStamp=min($UnixTimeStamp,time());
-        $is304=true;
-        $is412=false;
-        $nbCond=0;
-
-            //rfc2616-sec3.html#sec3.3.1
-        $dateLastModif=gmdate('D, d M Y H:i:s \G\M\T',$UnixTimeStamp);
-        $dateCacheClient='Thu, 10 Jan 1980 20:30:40 GMT';
-
-            //rfc2616-sec14.html#sec14.19 //='"0123456789abcdef0123456789abcdef"'
-        if (isset($_SERVER['QUERY_STRING'])) $myQuery='?'.$_SERVER['QUERY_STRING'];
-        else $myQuery='';
-        if ($session&&isset($_SESSION))
-        {
+        if ((!$feedMode) && (($modifScript = filemtime($scriptName)) > $UnixTimeStamp)) $UnixTimeStamp = $modifScript;
+        $UnixTimeStamp = min($UnixTimeStamp, time());
+        $is304 = true;
+        $is412 = false;
+        $nbCond = 0;
+        //rfc2616-sec3.html#sec3.3.1
+        $dateLastModif = gmdate('D, d M Y H:i:s \G\M\T', $UnixTimeStamp);
+        $dateCacheClient = 'Thu, 10 Jan 1980 20:30:40 GMT';
+        //rfc2616-sec14.html#sec14.19 //='"0123456789abcdef0123456789abcdef"'
+        if (isset($_SERVER['QUERY_STRING'])) $myQuery = '?' . $_SERVER['QUERY_STRING'];
+        else $myQuery = '';
+        if ($session && isset($_SESSION)) {
             global $_sessionMode;
-            $_sessionMode=$session;
-            $myQuery.=print_r($_SESSION,true).session_name().'='.session_id();
+            $_sessionMode = $session;
+            $myQuery.= print_r($_SESSION, true) . session_name() . '=' . session_id();
         }
-        $etagServer='"'.md5($scriptName.$myQuery.'#'.$dateLastModif).'"';
-
-        if ((!$is412)&&isset($_SERVER['HTTP_IF_MATCH']))
-        {//rfc2616-sec14.html#sec14.24
-            $etagsClient=stripslashes($_SERVER['HTTP_IF_MATCH']);
-            $is412=(($etagClient!='*')&&(strpos($etagsClient,$etagServer)===false));
+        $etagServer = '"' . md5($scriptName . $myQuery . '#' . $dateLastModif) . '"';
+        if ((!$is412) && isset($_SERVER['HTTP_IF_MATCH'])) { //rfc2616-sec14.html#sec14.24
+            $etagsClient = stripslashes($_SERVER['HTTP_IF_MATCH']);
+            $is412 = (($etagClient != '*') && (strpos($etagsClient, $etagServer) === false));
         }
-        if ($is304&&isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
-        {//rfc2616-sec14.html#sec14.25 //rfc1945.txt
+        if ($is304 && isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) { //rfc2616-sec14.html#sec14.25 //rfc1945.txt
             $nbCond++;
-            $dateCacheClient=$_SERVER['HTTP_IF_MODIFIED_SINCE'];
-            $p=strpos($dateCacheClient,';');
-            if ($p!==false)
-                $dateCacheClient=substr($dateCacheClient,0,$p);
-            $is304=($dateCacheClient==$dateLastModif);
+            $dateCacheClient = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
+            $p = strpos($dateCacheClient, ';');
+            if ($p !== false) $dateCacheClient = substr($dateCacheClient, 0, $p);
+            $is304 = ($dateCacheClient == $dateLastModif);
         }
-        if ($is304&&isset($_SERVER['HTTP_IF_NONE_MATCH']))
-        {//rfc2616-sec14.html#sec14.26
+        if ($is304 && isset($_SERVER['HTTP_IF_NONE_MATCH'])) { //rfc2616-sec14.html#sec14.26
             $nbCond++;
-            $etagClient=stripslashes($_SERVER['HTTP_IF_NONE_MATCH']);
-            $is304=(($etagClient==$etagServer)||($etagClient=='*'));
+            $etagClient = stripslashes($_SERVER['HTTP_IF_NONE_MATCH']);
+            $is304 = (($etagClient == $etagServer) || ($etagClient == '*'));
         }
-        if ((!$is412)&&isset($_SERVER['HTTP_IF_UNMODIFIED_SINCE']))
-        {//rfc2616-sec14.html#sec14.28
-            $dateCacheClient=$_SERVER['HTTP_IF_UNMODIFIED_SINCE'];
-            $p=strpos($dateCacheClient,';');
-            if ($p!==false)
-                $dateCacheClient=substr($dateCacheClient,0,$p);
-            $is412=($dateCacheClient!=$dateLastModif);
+        if ((!$is412) && isset($_SERVER['HTTP_IF_UNMODIFIED_SINCE'])) { //rfc2616-sec14.html#sec14.28
+            $dateCacheClient = $_SERVER['HTTP_IF_UNMODIFIED_SINCE'];
+            $p = strpos($dateCacheClient, ';');
+            if ($p !== false) $dateCacheClient = substr($dateCacheClient, 0, $p);
+            $is412 = ($dateCacheClient != $dateLastModif);
         }
-        if ($feedMode)
-        {//Special RSS/ATOM
+        if ($feedMode) { //Special RSS/ATOM
             global $clientCacheDate;
-            $clientCacheDate=strtotime($dateCacheClient);
-            $cachePrivacy=0;
+            $clientCacheDate = strtotime($dateCacheClient);
+            $cachePrivacy = 0;
         }
-
-        if ($is412)
-        {//rfc2616-sec10.html#sec10.4.13
+        if ($is412) { //rfc2616-sec10.html#sec10.4.13
             header('HTTP/1.1 412 Precondition Failed');
             header('Cache-Control: private, max-age=0, must-revalidate');
             header('Content-Type: text/plain');
             echo "HTTP/1.1 Error 412 Precondition Failed: Precondition request failed positive evaluation\n";
             return true;
         }
-        elseif ($is304&&($nbCond>0))
-        {//rfc2616-sec10.html#sec10.3.5
+        elseif ($is304 && ($nbCond > 0)) { //rfc2616-sec10.html#sec10.3.5
             header('HTTP/1.0 304 Not Modified');
-            header('Etag: '.$etagServer);
+            header('Etag: ' . $etagServer);
             if ($feedMode) header('Connection: close'); //Comment this line under IIS
             return true;
         }
-        else
-        {//rfc2616-sec10.html#sec10.2.1
-                //rfc2616-sec14.html#sec14.3
+        else { //rfc2616-sec10.html#sec10.2.1
+            //rfc2616-sec14.html#sec14.3
             if ($compression) ob_start('_httpConditionalCallBack'); //Will check HTTP_ACCEPT_ENCODING
-                //header('HTTP/1.0 200 OK');
-            if ($cacheSeconds==0)
-            {
-                $cache='private, must-revalidate, ';
-                    //$cacheSeconds=-1500000; //HTTP/1.0
+            //header('HTTP/1.0 200 OK');
+            if ($cacheSeconds == 0) {
+                $cache = 'private, must-revalidate, ';
+                //$cacheSeconds=-1500000; //HTTP/1.0
+                
             }
-            elseif ($cachePrivacy==0) $cache='private, ';
-            elseif ($cachePrivacy==2) $cache='public, ';
-            else $cache='';
-            $cache.='max-age='.floor($cacheSeconds);
-	    // header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T',time()+$cacheSeconds)); //HTTP/1.0 //rfc2616-sec14.html#sec14.21
-            header('Cache-Control: '.$cache); //rfc2616-sec14.html#sec14.9
-            header('Last-Modified: '.$dateLastModif);
-            header('Etag: '.$etagServer);
+            elseif ($cachePrivacy == 0) $cache = 'private, ';
+            elseif ($cachePrivacy == 2) $cache = 'public, ';
+            else $cache = '';
+            $cache.= 'max-age=' . floor($cacheSeconds);
+            // header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T',time()+$cacheSeconds)); //HTTP/1.0 //rfc2616-sec14.html#sec14.21
+            header('Cache-Control: ' . $cache); //rfc2616-sec14.html#sec14.9
+            header('Last-Modified: ' . $dateLastModif);
+            header('Etag: ' . $etagServer);
             if ($feedMode) header('Connection: close'); //rfc2616-sec14.html#sec14.10 //Comment this line under IIS
-            return $_SERVER['REQUEST_METHOD']=='HEAD'; //rfc2616-sec9.html#sec9.4
+            return $_SERVER['REQUEST_METHOD'] == 'HEAD'; //rfc2616-sec9.html#sec9.4
+            
         }
     }
     /**
      * ob start 回调函数
      * @param string $buffer  buffer
      * @param integer $mode gz压缩方式
-     * @return $buffer 
+     * @return $buffer
      *
-     */ 
-    function _httpConditionalCallBack($buffer,$mode=5){
-            //Private function automatically called at the end of the script when compression is enabled
-            //rfc2616-sec14.html#sec14.11
-            //You can adjust the level of compression with zlib.output_compression_level in php.ini
-        if (extension_loaded('zlib')&&(!ini_get('zlib.output_compression')))
-        {
-            $buffer2=ob_gzhandler($buffer,$mode); //Will check HTTP_ACCEPT_ENCODING and put correct headers
-            if (strlen($buffer2)>1) //When ob_gzhandler succeeded
-                $buffer=$buffer2;
+     */
+    function _httpConditionalCallBack($buffer, $mode = 5) {
+        //Private function automatically called at the end of the script when compression is enabled
+        //rfc2616-sec14.html#sec14.11
+        //You can adjust the level of compression with zlib.output_compression_level in php.ini
+        if (extension_loaded('zlib') && (!ini_get('zlib.output_compression'))) {
+            $buffer2 = ob_gzhandler($buffer, $mode); //Will check HTTP_ACCEPT_ENCODING and put correct headers
+            if (strlen($buffer2) > 1) //When ob_gzhandler succeeded
+            $buffer = $buffer2;
         }
-        header('Content-Length: '.strlen($buffer)); //Allows persistant connections //rfc2616-sec14.html#sec14.13
+        header('Content-Length: ' . strlen($buffer)); //Allows persistant connections //rfc2616-sec14.html#sec14.13
         return $buffer;
     }
     /**
      * 刷新 httpConditional
      * @param integer $UnixTimeStamp  unix 时间戳
-     */ 
-    static function httpConditionalRefresh($UnixTimeStamp){
-            //Update HTTP headers if the content has just been modified by the client's request
-            //See an example on http://alexandre.alapetite.net/doc-alex/compteur/
+     */
+    static function httpConditionalRefresh($UnixTimeStamp) {
+        //Update HTTP headers if the content has just been modified by the client's request
+        //See an example on http://alexandre.alapetite.net/doc-alex/compteur/
         if (headers_sent()) return false;
-        
-        if (isset($_SERVER['SCRIPT_FILENAME'])) $scriptName=$_SERVER['SCRIPT_FILENAME'];
-        elseif (isset($_SERVER['PATH_TRANSLATED'])) $scriptName=$_SERVER['PATH_TRANSLATED'];
+        if (isset($_SERVER['SCRIPT_FILENAME'])) $scriptName = $_SERVER['SCRIPT_FILENAME'];
+        elseif (isset($_SERVER['PATH_TRANSLATED'])) $scriptName = $_SERVER['PATH_TRANSLATED'];
         else return false;
-        
-        $dateLastModif=gmdate('D, d M Y H:i:s \G\M\T',$UnixTimeStamp);
-        
-        if (isset($_SERVER['QUERY_STRING'])) $myQuery='?'.$_SERVER['QUERY_STRING'];
-        else $myQuery='';
+        $dateLastModif = gmdate('D, d M Y H:i:s \G\M\T', $UnixTimeStamp);
+        if (isset($_SERVER['QUERY_STRING'])) $myQuery = '?' . $_SERVER['QUERY_STRING'];
+        else $myQuery = '';
         global $_sessionMode;
-        if ($_sessionMode&&isset($_SESSION))
-            $myQuery.=print_r($_SESSION,true).session_name().'='.session_id();
-        $etagServer='"'.md5($scriptName.$myQuery.'#'.$dateLastModif).'"';
-        
-        header('Last-Modified: '.$dateLastModif);
-        header('Etag: '.$etagServer);
+        if ($_sessionMode && isset($_SESSION)) $myQuery.= print_r($_SESSION, true) . session_name() . '=' . session_id();
+        $etagServer = '"' . md5($scriptName . $myQuery . '#' . $dateLastModif) . '"';
+        header('Last-Modified: ' . $dateLastModif);
+        header('Etag: ' . $etagServer);
     }
 }

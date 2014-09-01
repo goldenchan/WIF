@@ -5,9 +5,9 @@
 * @package cache
 * @author 陈金(wind.golden@gmail.com)
 */		
-include dirname(__DIR__).DS.'baselib'.DS."Predis/Autoloader.php";
+//include dirname(__DIR__).DS.'baselib'.DS."Predis/Autoloader.php";
 /**
- * redis操作封装类
+ * todo redis操作封装类
  */
 class Redis_Cache {	
     

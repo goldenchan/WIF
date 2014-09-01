@@ -5,7 +5,7 @@
 * @package cache
 * @author 陈金(wind.golden@gmail.com)
 */		
-include dirname(__DIR__).DS.'baselib/Predis/Autoloader.php';
+include dirname(__DIR__).DS.'baselib/Memcache/MemcacheOpt.php';
 /**
  * memcached操作封装类
  */
