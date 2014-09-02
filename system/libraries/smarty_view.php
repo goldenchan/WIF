@@ -48,12 +48,12 @@ class Smarty_View {
     /**
      * Constructor of the class
      *
-     * @param templateName A template name
-     * @param cachingEnabled default false.
+     * @param $templateName A template name
+     * @param $cachingEnabled default false.
      * If left as SMARTY_VIEW_CACHE_CHECK, the blog settings will checked to determine whether caching is enabled
      * or not.
-     * @param layout the template layout ('admin' or 'front')
-     * @param data Data that will be used to generate a unique id for the cached view (it will be ignored
+     * @param $layout the template layout ('admin' or 'front')
+     * @param $data Data that will be used to generate a unique id for the cached view (it will be ignored
      * if caching is not enabled)
      */
     function __construct($templateName, $layout, $cachingEnabled = false, $data = array()) {

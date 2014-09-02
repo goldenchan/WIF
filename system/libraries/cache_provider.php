@@ -69,7 +69,7 @@ class Cache_Provider {
      * @param string|array $key 缓存key
      * @param string $group 组
      * @param string|array|boolean|integer $value 缓存值
-     * @param integer $expired_date 数据有效期
+     * @param integer $expire_date 数据有效期
      * @return boolean true or false
      */
     function set($key, $group = '', $value, $expire_date = 0) {

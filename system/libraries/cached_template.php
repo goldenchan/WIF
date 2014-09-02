@@ -20,8 +20,9 @@
 class Cached_Template extends Template {
     /**
      * Constructor.
-     *
-     * @param cacheLifeTime How many seconds we would like to cache the template
+     * @param string $templateFile 不带主题的模版文件路径
+     * @param string $layout 模版主题
+     * @param int $cacheLifetime How many seconds we would like to cache the template
      */
     function Cached_Template($templateFile, $layout = '', $cacheLifetime = 1800) {
         // create the Smarty object and set the security values
@@ -33,7 +34,7 @@ class Cached_Template extends Template {
     }
     /**
      * Renders the template and returns the contents as an string
-     *
+     * @param string $cacheId  缓存id
      * @return The result as an string
      */
     function fetch($cacheId = 0) {
@@ -42,7 +43,7 @@ class Cached_Template extends Template {
     /**
      * returns wether this template is cached or not
      *
-     * @param cacheId The cache identifier
+     * @param string $cacheId The cache identifier
      * @return true if the template is cached or false otherwise
      */
     function isCached($cacheId = 0) {
@@ -52,7 +53,7 @@ class Cached_Template extends Template {
     /**
      * clears the cache whose id is $cacheId
      *
-     * @param cacheId The id of the cache that we'd like to clear
+     * @param string $cacheId The id of the cache that we'd like to clear
      * @return nothing
      */
     function clearCache($cacheId = 0) {
@@ -60,7 +61,7 @@ class Cached_Template extends Template {
     }
     /**
      * Displays the result of rendering the template
-     *
+     * @param string $cacheId The id of the cache that we'd like to clear
      * @return Always true
      */
     function display($cacheId = 0) {

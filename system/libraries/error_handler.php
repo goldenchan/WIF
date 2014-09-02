@@ -20,7 +20,7 @@ class Error_Handler {
     /**
      * 处理非fatal错误 runtime 执行
      */
-    public function runtimeError($errno, $errstr = '', $errfile = '', $errline = '') {
+    public function runtimeError() {
         // if error has been supressed with an @
         if (error_reporting() == 0) {
             return;
@@ -119,6 +119,7 @@ class Error_Handler {
     }
     /**
      * 获取参数
+     * @param $arg 参数
      */
     function getArgument($arg) {
         switch (strtolower(gettype($arg))) {
@@ -170,6 +171,11 @@ class Error_Handler {
     }
     /**
      * 格式化错误
+     * @param $errno 错误码
+     * @param $errstr 错误串
+     * @param $errfile 错误文件
+     * @param $errline 错误行
+     * @return string 格式化后的错误信息
      */
     function format_error($errno, $errstr, $errfile, $errline) {
         $trace = print_r(debug_backtrace(false) , true);

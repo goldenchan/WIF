@@ -212,7 +212,7 @@ abstract class Controller {
     }
     /**
      *  加载helper类
-     * @param string $helpers 要加载的无后缀helper类
+     * @param string $helper_name 要加载的无后缀helper类
      * @return object
      * @access public
      */
@@ -267,7 +267,7 @@ abstract class Controller {
     }
     /**
      *  设置view对象输出内容类型
-     * @param $message string  输出类型 "text/html" or "text/plain" or "text/xml"
+     * @param string $type  输出类型 "text/html" or "text/plain" or "text/xml"
      *
      * @access protected
      */
@@ -280,7 +280,7 @@ abstract class Controller {
      * @deprecated
      * @param string  $controller  The new Controller name
      * @param string $action The new action name to be redirected to
-     * @param array  Any parameters passed to this method will be passed as
+     * @param array $args Any parameters passed to this method will be passed as
      *               parameters to the new action.
      * @return mixed the function result, or FALSE on error
      * @access protected
@@ -400,8 +400,10 @@ abstract class Controller {
         if (count($this->validate_error_mesages) > 0) return false;
         return true;
     }
-    /**
+   /**
      * 魔术方法 考虑不存在的actions
+     * @param string $method 方法
+     * @param array $args 变量
      */
     function __call($method, $args) {
         throw new Exception('Controller::__call(): method ' . $method . ' of  ' . get_class($this) . ' dose not exists, exiting.');

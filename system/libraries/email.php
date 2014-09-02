@@ -122,12 +122,12 @@ class Email {
     var $is_html = true;
     /**
      * 构造函数
-     *  @param string $from  发送邮箱
-     *  @param string $from_name 发送人名字
-     *  @param string $smtpUserName smtp 用户名
-     *  @param string $smtpPassword smtp password
-     *  @param string $smtpHostNames host
-     *  @param int $port 端口
+     * @param string $from  发送邮箱
+     * @param string $from_name 发送人名字
+     * @param string $smtpUserName smtp 用户名
+     * @param string $smtpPassword smtp password
+     * @param string $smtpHostNames host
+     * @param int $port 端口
      */
     function __construct($from = '', $from_name = '', $smtpUserName = '', $smtpPassword = '', $smtpHostNames = '', $port = '') {
         $this->from = $from;

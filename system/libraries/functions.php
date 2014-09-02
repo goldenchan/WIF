@@ -156,7 +156,7 @@ function word_underscore($camel_cased_word) {
 /**
  * Returns an camelcased-syntaxed ($LikeThisDearReader) version .
  *
- * @param string $camel_cased_word Camel-cased word to be "underscorized"
+ * @param string $underscore_word Camel-cased word to be "underscorized"
  * @return string Underscore-syntaxed version of the $camel_cased_word
  * @access public
  * @static
@@ -185,6 +185,7 @@ function stripslashes_deep($value) {
 }
 /**
  * spl_register_autoload用的函数
+ * @param $class 类名
  */
 function auto_load($class) {
     //include strtolower($class).'.php';
@@ -307,6 +308,7 @@ function current_url() {
 }
 /**
  * 初始化session设置
+ * @param $expire_seconds 默认过期时间
  */
 function init_session($expire_seconds = 180000) {
     if (!session_id()) {
@@ -340,9 +342,9 @@ function vendor($string) {
 }
 /**
  *  调用远程http接口，返回接口执行的结果
- * @param url string 接口地址
- * @param option array 选项设置 （POST过来的参数）
- * @param method string 请求方式 GET or POST
+ * @param string $uri 接口地址
+ * @param array $option 选项设置 （POST过来的参数）
+ * @param string $method 请求方式 GET or POST
  * @param mixed 返回结果
  */
 function request_http_client($uri = '', $option = array() , $method = 'GET') {
@@ -369,7 +371,7 @@ function request_http_client($uri = '', $option = array() , $method = 'GET') {
 }
 /** 
  * 计算身份证校验码，根据国家标准GB 11643-1999
- * @param string $idcard 身份证号前17位
+ * @param string $idcard_base 身份证号前17位
  * @return string 根据前17位生成最后一位校验位
  */
 function idcard_verify_number($idcard_base) {
@@ -564,7 +566,7 @@ function get_mime_type($filename, $ext = '') {
  *   中文转unicode
  * @example'<style>font:"微软正黑体"</style>' 转成 '<STYLE>FONT:"\5FAE\8F6F\6B63\9ED1\4F53"</STYLE>'
  * @param string $name 要转换的字符串
- * @param string $encoding 要转换字符串的编码 默认utf-8
+ * @param string $charset 要转换字符串的编码 默认utf-8
  * @return $string 转换后的字符串
  */
 function unicode_encode($name, $charset = 'UTF-8') { //to Unicode

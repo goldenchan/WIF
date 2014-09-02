@@ -19,9 +19,12 @@ class Default_Controller extends App_Controller {
     var $pre_load_view_params = true;
     /**
      * 首页
+     * @param $params array('_URL'=>'url ','_GET'=>'GET参数和值','_POST'=>'POST参数和值','FILES'=>'FILES参数和值')
      */
     public function index($params) {
-        $this->view()->render();
+        $this->view()->render();//模版输出
+        // return array('info'=>array('t'=>2)); 不用模版输出直接return, 会自动把数组或对象变成json输出
+        //
     }
     /**
      * 404

@@ -50,6 +50,8 @@ class Message_Queue {
     }
     /**
      * 魔术方法
+     * @param $method 方法
+     * @param $args 参数
      */
     function __call($method, $args) {
         call_user_func_array(array(
@@ -58,4 +60,3 @@ class Message_Queue {
         ) , $args);
     }
 }
-?>

@@ -109,6 +109,7 @@ class Sqlite_Cache extends WI_Sqlite3 {
     /**
      *  根据key 获取dir
      * @param string $key key
+     * @param string $group 组
      * @return string  dir
      */
     private function getDir($key, $group = '') {
@@ -189,7 +190,7 @@ class Sqlite_Cache extends WI_Sqlite3 {
      *  更新表记录
      * @param string $cache_key key
      * @param string $cache_group group
-     * @param array $update_info, 待更新数据
+     * @param array $update_info 待更新数据
      * @param array $condition 查询条件
      * @param string $table 表名
      * @return boolean true or false
@@ -322,3 +323,4 @@ class Sqlite_Cache extends WI_Sqlite3 {
         }
     }
 }
+

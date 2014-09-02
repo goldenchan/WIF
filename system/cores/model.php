@@ -238,7 +238,7 @@ abstract class Model {
      * 获取一条记录
      * @note 此操作可关联缓存
      * @param array  $condition 查询条件，只能获取一行
-     * @param string|array  $return_fields字符串时 '*'为取所有  'user_id,user_name'为取部分, 数组时  array('user_id','user_name')为取部分
+     * @param string|array  $return_fields 字符串时 '*'为取所有  'user_id,user_name'为取部分, 数组时  array('user_id','user_name')为取部分
      * @param string $cache_key  缓存key
      * @param string $cache_group  缓存组
      * @return array 返回查询结果
@@ -480,7 +480,7 @@ abstract class Model {
      extra(补充属性),
      privileges(权限),
      comment(注释)
-     * @param $props  string 上面列举的可返回属性之一
+     * @param $prop  string 上面列举的可返回属性之一
      * @param $fields array  字段名数组
      * @return array   要求字段的一维属性数组
      */
@@ -681,19 +681,26 @@ abstract class Model {
             return $sql.";";
     }
     /**
-     *  Format a mySQL string correctly for safe mySQL insert
-     *  (no mater if magic quotes are on or not)
-     */
-    public function mysqlEscape($str, $dbn = null) {
-        return mysql_real_escape_string($str, $dbn);
-    }
-    /**
-     *  Format a SQLite string correctly for safe SQLite insert
-     *  (no mater if magic quotes are on or not)
-     */
-    public function sqliteEscape($str, $dbn = null) {
-        return sqlite_escape_string($str);
-    }
+	*  Format a mySQL string correctly for safe mySQL insert
+    *  (no mater if magic quotes are on or not)
+    * @param string $str mysql SQL串
+    * @param object $dbh mysql 数据库Handler
+    * @return string 经过escape的SQL串
+	*/
+	public function mysqlEscape($str,$dbh=null){
+		return mysql_real_escape_string($str,$dbh);
+		//return mysql_escape_string($str);
+	}
+	/**
+	*  Format a SQLite string correctly for safe SQLite insert
+    *  (no mater if magic quotes are on or not)
+    * @param string $str sqilte SQL串
+    * @param object $dbh 数据库Handler null
+    * @return string 经过escape的SQL串
+	*/
+	public function sqliteEscape($str,$dbh=null){
+		return sqlite_escape_string($str);
+	}
     /**
      *  魔术函数
      *  (1)根据ID获取某个字段 （数据库中字段名是tag_name  这里条用就得用TagName 这样做是为了统一函数名规范）

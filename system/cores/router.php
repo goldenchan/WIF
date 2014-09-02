@@ -127,7 +127,7 @@ class Router {
     public static $action = '';
     /**
      * Initializes the router by getting the URL and cleaning it
-     *
+     * @param $url url
      * @since 2.0.0
      * @access protected
      */

@@ -23,6 +23,7 @@ class File_Cache {
      *  根据key获取文件缓存值
      * @param string $key 关键字
      * @param string $group key群组
+     * @param array $condition 查询条件 空数组
      * @param int $expire 数据有效期
      * @return mixed 失败返回null 成功返回缓存数据
      */
@@ -75,6 +76,7 @@ class File_Cache {
      *  根据key删除缓存文件
      * @param string $key 关键字
      * @param string $group key群组
+     * @param array $condition 查询条件 空数组
      * @return boolean true or false
      */
     public function delete($key = '', $group = '', $condition = '') {
@@ -93,6 +95,8 @@ class File_Cache {
      *  根据key更新缓存文件 可以优化
      * @param string $key 关键字
      * @param string $group key群组
+     * @param array $update_info 要更新的数据 空数组
+     * @param array $condition 查询条件 空数组
      * @return boolean true or false
      */
     public function update($key = '', $group = '', $update_info = null, $condition = null) {

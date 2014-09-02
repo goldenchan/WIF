@@ -6,10 +6,10 @@
  * @author 陈金(wind.golden@gmail.com)
  */
 /**
- *  Smarty dynamic block function
- *  @param string $param 模版变量
- *  @param string $content 模版变量值
- *  @param object $smarty smarty对象
+ * Smarty dynamic block function
+ * @param string $param 模版变量
+ * @param string $content 模版变量值
+ * @param object $smarty smarty对象
  */
 function smarty_block_dynamic($param, $content, &$smarty) {
     return $content;
@@ -49,8 +49,8 @@ class Template {
     var $_trimwhitespace;
     /**
      * Constructor.
-     *
-     * @param templateFile Complete path to the template file we are going to render
+     * @param string $templateFile 模版文件名
+     * @param string $templateDir 模版完整路径
      */
     function __construct($templateFile, $templateDir = '') {
         // create the Smarty object and set the security values
@@ -104,7 +104,7 @@ class Template {
      * look for those templates somewhere else. This method is obviously to be
      * used *before* rendering the template ;)
      *
-     * @param string $templateFolder The new path where we'd like to search for templates
+     * @param string $templateDir The new path where we'd like to search for templates
      * @return Returns always true.
      */
     function setTemplateDir($templateDir) {
@@ -156,7 +156,7 @@ class Template {
     /**
      * the Template object is by default not cached
      *
-     * @param viewId Not used
+     * @param $viewId Not used
      * @return always false
      */
     function isCached($viewId) {

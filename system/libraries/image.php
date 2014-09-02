@@ -78,10 +78,10 @@ class Image {
     }
     /** 
      * 生成头像或图片缩略图
-     *   @param string $file_path 源图片位置
-     *   @param boolean  $delete_origin 是否删除原图
-     *   @param string $upload_dir 缩略图上传路径
-     *   @return boolean true or false
+     * @param string $source_file_path 源图片位置
+     * @param string $dest_img_path 缩略图上传路径
+     * @param boolean  $delete_source 是否删除原图
+     * @return boolean true or false
      */
     public function thumb($source_file_path = null, $dest_img_path = null, $delete_source = true) {
         $srcImage = $file_path;
@@ -96,22 +96,22 @@ class Image {
     }
     /** 
      * 指定宽高和坐标剪切
-     *   @param string  $desImage 目的图片位置
-     *   @param int $width  缩略图宽
-     *   @param int $height 缩略图高
-     *   @param int $x x坐标
-     *   @param int $y y坐标
-     *   @return boolean true or false
+     * @param string  $desImage 目的图片位置
+     * @param int $width  缩略图宽
+     * @param int $height 缩略图高
+     * @param int $x x坐标
+     * @param int $y y坐标
+     * @return boolean true or false
      */
     public function crop($desImage, $width, $height, $x, $y) {
         return $this->image_obj->generate($desImage, $width, $height, $x, $y);
     }
     /** 
      * 指定宽高缩放
-     *   @param string  $objImg 目的图片位置
-     *   @param int $width  缩略图宽
-     *   @param int $height 缩略图高
-     *   @return boolean true or false
+     * @param string  $objImg 目的图片位置
+     * @param int $width  缩略图宽
+     * @param int $height 缩略图高
+     * @return boolean true or false
      */
     public function scale($objImg, $width, $height) {
         return $this->image_obj->generate($objImg, $width, $height);
