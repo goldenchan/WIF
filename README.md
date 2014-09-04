@@ -24,7 +24,7 @@ WI PHP Framework
     |   |-- logs    日志文件
     |   |-- models  模型文件目录
     |   |-- templates 模版目录
-    |   |   `-- default 主题目录
+    |   |   `-- default 默认module
     |   |       `-- default 默认控制器
     |   |-- tmp 临时目录        
     |   |   |-- cache 文件缓存目录
