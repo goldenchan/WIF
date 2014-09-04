@@ -92,7 +92,11 @@ function newRouter($controller_name, $action) {
     //var_dump(get_defined_vars());
     
 }
-//新建action
+/**
+ * 新建action
+ * @param string $controller 可包含module的控制器名 比如 user or admin/user
+ * @param string $action action名
+ */
 function newAction($controller, $action) {
     $controller_file = APP_ROOT_PATH . DS . 'controllers' . DS . strtolower($controller) . '_controller.php';
     if (!file_exists($controller_file)) {
@@ -116,21 +120,36 @@ function newAction($controller, $action) {
         }
     }
 }
-//新建控制器(action 可有可无)
-function newCtrler($controller_name = 'default', $action = null) {
-    if (strtolower($controller_name) == 'app') exit("invalid controller name!\n");
+/**
+ * 新建控制器(action 可有可无)
+ * @param string $controller 可包含module的控制器名 比如 user or admin/user
+ * @param string $action action名 
+ *
+ */
+function newCtrler($controller_name = 'default/default', $action = null) {
+    $count = count(explode('/', $controller_name));
+    if ($count > 2) exit('invalid controller name!');
+    elseif ($count === 1) {
+        $module = 'default';
+        $controller = $controller_name;
+    }
+    else {
+        list($module, $controller) = explode('/', $controller_name);
+    }
+    if (strtolower($controller_name) == 'default/app') exit("invalid controller name!\n");
     $content = '<?php
     /**
-    * ' . strtolower($controller_name) . '控制器文件
-    * @file application/controllers/' . strtolower($controller_name) . '_controller.php
+    * ' . strtolower($controller) . '控制器文件
+    * @file application/controllers/' . strtolower($controller) . '_controller.php
     * @author Developer(developer@gmail.com)
     * @package controller
+    * @module ' . $module . '
     * @date ' . date('Y-m-d H:i:s') . '
      */	
     /**
-    * ' . strtolower($controller_name) . '控制器 
+    * ' . strtolower($controller) . '控制器 
     */
-    class ' . ucfirst($controller_name) . '_Controller extends App_Controller { 
+    class ' . ucfirst($controller) . '_Controller extends App_Controller { 
     ' . ($action !== null ? 'function ' . $action . '(){//action 
 
     }' : '') . '
@@ -138,9 +157,13 @@ function newCtrler($controller_name = 'default', $action = null) {
 
 
 }';
+    $module !== 'default' && create_dir(APP_ROOT_PATH . DS . 'controllers' . DS .$module );
     write_file(APP_ROOT_PATH . DS . 'controllers' . DS . strtolower($controller_name) . '_controller.php', $content, 0777);
 }
-//新建Model
+/**
+ * 新建model
+ * @param string $model_name model类名
+ */
 function newModel($model_name = "users") {
     if (strtolower($model_name) == 'app') exit("invalid model name!\n");
     $classname = word_camelcase($model_name);
@@ -160,19 +183,19 @@ function newModel($model_name = "users") {
      * 无前缀的表名
      * @var string
      */
-    var $table = "company_user";
+    var $table = "不带前缀的表名";
     
     /**
      * 主键字段
      * @var string
      */
-	var $primary_key;
+	var $primary_key = "id";
     
     /**
      * 正则验证 键为 控制器方法validate($data)的$data中的键
      * @var array
      */
-	var $validate_preg=array();
+	var $validate_preg = array();
     
     /**
      * db验证 键为 控制器方法validate($data)的$data中的键
@@ -183,27 +206,23 @@ function newModel($model_name = "users") {
     if (file_exists(APP_ROOT_PATH . DS . 'models' . DS . strtolower($model_name) . '_model.php')) exit("model file " . strtolower($model_name) . "_model.php already exists!\n");
     write_file(APP_ROOT_PATH . DS . 'models' . DS . strtolower($model_name) . '_model.php', $content, 0777);
 }
-//新建一个空的模版
-function newTpl($tpl_data = 'default/index') {
-    $theme = WI_CONFIG::$default_template_theme;
+/**
+ * 新建一个空的模版
+ * @param string $tpl_data module/layout/file 比如default/default/index
+ */
+function newTpl($tpl_data = 'default/default/index') {
     $tmps = explode('/', $tpl_data);
-    if (count($tmps) !== 2) exit("incorrect template data \n");
+    if (count($tmps) !== 3) exit("incorrect template data \n");
+    $file_name = strtolower($tmps[0]) . DS . strtolower($tmps[1]) . '/' . strtolower($tmps[2]);
     $content = '{**
-* controller:' . strtolower($tmps[0]) . ' action:' . strtolower($tmps[1]) . '
-* @file application/templates/' . $theme . DS . strtolower($tmps[0]) . '/' . strtolower($tmps[1]) . '.tpl
+* module:' . strtolower($tmps[0]) . ' controller:' . strtolower($tmps[1]) . ' action:' . strtolower($tmps[2]) . '
+* @file application/templates/' . $file_name. WI_CONFIG::$smarty_tpl_ext . '
 * @author Developer(developer@gmail.com)
 * @date ' . date('Y-m-d H:i:s') . '
 */		
 **}
-{extends file="../layout/base.tpl"}
-{block name=keywords} keywords {/block}
-{block name=description} description {/block}
-{block name=title}page title {/block}
-{block name=head}{/block}
-{block name="body"}
-
-{/block} ';
-    if (file_exists(APP_ROOT_PATH . DS . 'templates' . DS . $theme . DS . strtolower($tmps[0]) . DS . strtolower($tmps[1]) . '.tpl')) exit("template file " . strtolower($tmps[0]) . DS . strtolower($tmps[1]) . ".tpl already exists!\n");
-    create_dir(APP_ROOT_PATH . DS . 'templates' . DS . $theme . DS . $tmps[0]);
-    write_file(APP_ROOT_PATH . DS . 'templates' . DS . $theme . DS . strtolower($tmps[0]) . DS . strtolower($tmps[1]) . '.tpl', $content, 0777);
+';
+    if (file_exists(APP_ROOT_PATH . DS . 'templates' . DS . $file_name . WI_CONFIG::$smarty_tpl_ext)) exit("template file " . strtolower($tmps[0]) . DS . strtolower($tmps[1]) . ".tpl already exists!\n");
+    create_dir(APP_ROOT_PATH . DS . 'templates' . DS . strtolower($tmps[0]) . DS . strtolower($tmps[1]));
+    write_file(APP_ROOT_PATH . DS . 'templates' . DS .$file_name . WI_CONFIG::$smarty_tpl_ext, $content, 0777);
 }

@@ -14,7 +14,7 @@ abstract class App_Controller extends Controller {
      * app view对象
      * @var object
      */
-    var $_appview = null;
+    private $_appview = null;
     /**
      * rop debug开关
      * @var boolean
@@ -70,11 +70,8 @@ abstract class App_Controller extends Controller {
      array 属性未赋值 返回当前用户的信息数组
      */
     function me($prop = '') {
-        $current_user_info = $this->session->read('user_info');
-        if ($prop !== '' && isset($current_user_info[$prop])) {
-            return $current_user_info[$prop];
-        }
-        else return $current_user_info;
+        $me = $this->session->read('user_info');
+        return $prop !== '' && isset($me[$prop]) ? $me[$prop] : $me;
     }
     /**
      * view对象 重载
