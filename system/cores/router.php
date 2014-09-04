@@ -126,6 +126,13 @@ class Router {
      */
     public static $action = '';
     /**
+     * The module for controller
+     *
+     * @since 2.0.0
+     * @access protected
+     */
+    public static $module = 'default';
+    /**
      * Initializes the router by getting the URL and cleaning it
      * @param $url url
      * @since 2.0.0
@@ -196,11 +203,18 @@ class Router {
                 $params['_FILES'] = $_FILES;
                 // Store the parameters and callback function to execute later
                 self::$params = $params;
+
+                //处理module
+                strpos($callback[0],'/') === false && $callback[0]= 'default/'.$callback[0]; 
+                list(self::$module,$controller)= explode('/',$callback[0]);
+                if(self::$module !== 'default')
+                    set_include_path(get_include_path() . PATH_SEPARATOR . APP_ROOT_PATH . "controllers" .DS.self::$module); 
+    
                 //add by chenjin 20140806 make the action be dynamic
                 $k = trim($callback[1], '<>');
                 if (strpos($callback[1], '<') === 0 && isset($params[$k])) {
                     $action = lcfirst(word_camelcase(str_replace('.', '_', $params[$k])));
-                    $callback = (!method_exists($callback[0] . '_Controller', $action) ? $this->default_route : array(
+                    $callback = (!method_exists($controller . '_Controller', $action) ? $this->default_route : array(
                         $callback[0],
                         $action
                     ));
@@ -218,9 +232,7 @@ class Router {
         if (!$matched_route && $this->default_route !== NULL) {
             $this->callback = $this->default_route;
             self::$params = $this->url_clean;
-            $this->route = FALSE;
-            //return array( 'params' => $this->url_clean, 'callback' => $this->default_route, 'route' => FALSE, 'original_route' => FALSE );
-            
+            $this->route = FALSE;            
         }
     }
     /**
@@ -238,15 +250,12 @@ class Router {
             return FALSE;
         }
         //hack by chenjin 20130317 check if the router is for the controller class
-        self::$controller = $this->callback[0];
+        self::$controller = substr($this->callback[0],strlen(self::$module)+1);
         self::$action = $this->callback[1];
-        $this->callback[0].= "_Controller";
-        //$class = new $this->callback[0];
-        //$this->callback = array($class,self::$action);
-        //$this->callback[0] = $class;
+        $real_controller_name = self::$controller."_Controller";
         $function_return = call_user_func_array(array(
-            new $this->callback[0],
-            $this->callback[1]
+            new $real_controller_name,
+            self::$action
         ) , array(
             self::$params
         ));

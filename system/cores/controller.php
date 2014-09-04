@@ -11,6 +11,11 @@
  */
 abstract class Controller {
     /**
+     * 模块名
+     * @var string
+     */
+    public $module = null;
+    /**
      * 类名
      * @var string
      */
@@ -21,50 +26,15 @@ abstract class Controller {
      */
     public $action = null;
     /**
-     * api方法名列表 （js调用）
-     * @var array
-     */
-    protected $api_actions = array();
-    /**
-     * 不检查模板是否存在的方法名
-     * @var array
-     */
-    protected $actions_without_template = array();
-    /**
-     * 无后缀model类名
-     * @var array
-     */
-    protected $models = array();
-    /**
      * 实例化后的model对象
      * @var array
      */
     protected $model_objects = array();
     /**
-     * 无后缀helper类名
-     * @var array
-     */
-    protected $helpers = array();
-    /**
      * 实例化后的helper对象
      * @var array
      */
     protected $helper_objects = array();
-    /**
-     * 模版主题
-     * @var string
-     */
-    protected $tpl_theme = '';
-    /**
-     * 模板目录
-     * @var string
-     */
-    protected $tpl_path = '';
-    /**
-     * 模板文件名
-     * @var string
-     */
-    protected $tpl_file = '';
     /**
      * View 类对象
      * @var object
@@ -85,7 +55,6 @@ abstract class Controller {
      * @var boolean
      */
     protected $cross_domain = true; //js是否跨域
-    
     /**
      * View cache开关
      * @var boolean
@@ -152,11 +121,6 @@ abstract class Controller {
      */
     protected $view_debug = false;
     /**
-     * view debug时候是否强制编译
-     * @var boolean
-     */
-    protected $force_complie_in_debug = true;
-    /**
      * router 过来的变量
      * @var array
      */
@@ -170,11 +134,10 @@ abstract class Controller {
         default_value($this->name,Router::$controller);//没有controller 数据则从Router中获取
         $this->action = Router::$action;//action数据从Router中获取
         $this->router_params = Router::$params;//router_params数据从Router中取
+        $this->module = Router::$module;//module数据从Router中取
         $this->post_data = $_POST;
         $this->params_data = $_GET;
         $this->post_files = $_FILES; //$_FILES处理
-        //初始化模版主题
-        $this->tpl_theme = WI_CONFIG::$default_template_theme;
         //可以重置任意属性 目前只给cli模式和api方式调用
         if (is_array($reset_properties)) {
             foreach ($reset_properties as $property => $value) {
@@ -236,30 +199,19 @@ abstract class Controller {
     public function view($reload = false) {
         if (!is_object($this->_view) || $reload) {
             if ($this->content_type === 'text/html') {
-                if (empty($this->tpl_path) && $this->name !== '') {
-                    $this->tpl_path = $this->name;
-                }
-                if (empty($this->tpl_file) && $this->action !== '') {
-                    $this->tpl_file = $this->action;
-                }
-                $view = new View('text/html', $this->tpl_file, $this->tpl_path, $this->tpl_theme, $this->view_cache, $this->data_for_view_cache);
-                //$view->setDebugMode($this->view_debug,$this->force_complie_in_debug);
-                
+                $tpl_path = $this->name;
+                $tpl_filename =  $this->action;
+                $view = new View('text/html', $tpl_filename, $tpl_path, $this->module, $this->view_cache, $this->data_for_view_cache);
             }
-            else if (in_array($this->content_type, array(
+            elseif (in_array($this->content_type, array(
                 'text/plain',
                 'text/xml'
             ))) {
                 $view = new View($this->content_type);
-                $view->addHeaderResponse("Expires: Sun, 17 Mar 2013 05:00:00 GMT");
-                $view->addHeaderResponse("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-                $view->addHeaderResponse("Cache-Control: no-store, no-cache, must-revalidate");
-                $view->addHeaderResponse("Cache-Control: post-check=0, pre-check=0");
-                $view->addHeaderResponse("Pragma: no-cache");
                 $view->crossDomain = $this->cross_domain;
             }
             else {
-                throw new Exception('Error content type');
+                throw new Exception('Error view content type');
             }
             $this->_view = $view;
         }
@@ -308,7 +260,7 @@ abstract class Controller {
     }
     /**
      * 用api 的方式 执行action 忽略掉GET POST FILE 的参数
-     * @param string  $controller  控制器名
+     * @param string  $controller  当前模块下的控制器名 不可以跨模块调用
      * @param string $action 要执行的函数 action名
      * @param array $args  给action传递的参数
      * @param array $extras 是否执行api action 对应控制器的init和shutdown类函数 比如array('exe_init'=>false,'exe_shutdown'=>false) 为init和shutdown类函数都不执行

@@ -100,12 +100,7 @@ class WI_CONFIG {
      * smarty template 编译是是否检查文件有改动
      * @var string
      */
-    public static $smarty_compile_check = true;
-    /**
-     * smarty template 主题
-     * @var string
-     */
-    public static $default_template_theme = 'default';
+    public static $smarty_compile_check = true; 
     /**
      * smarty template html内容去掉空白部分
      * @var string
@@ -140,6 +135,7 @@ class WI_CONFIG {
      * @example2  '/user/view/(?P<userid>[0-9]+)'=> array( 'UserClass', 'view_user' )//匹配数字
      * @example3  '/browse/(?P<category>[^\/]+)' => array('browse','browse_category') //除了"/"之外的所有匹配
      * @example4  '/api/(?P<method>[A-Za-z.]+)' => array('browse','<method>') 动态方法绑定，方法名即为 匹配到的 $method
+     * @example5  '/browse/(?P<category>[^\/]+)' => array('admin/browse','browse_category') //除了"/"之外的所有匹配 其中admin是module名
      */
     public static $routes = array(
         '/' => array(

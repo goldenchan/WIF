@@ -51,11 +51,11 @@ class View {
      */
     var $_layout;
     /**
-     * 主题名
+     * 模块名
      * @var string
      * @access private
      */
-    var $_theme;
+    var $_module;
     /**
      * 缓存开关
      * @var boolean
@@ -92,7 +92,8 @@ class View {
      * @access private
      */
     var $_templates_support = array(
-        'smarty'
+        'smarty',
+        'simple'
     );
     /**
      * 跨域
@@ -110,10 +111,10 @@ class View {
      * @param boolean $cachingEnabled 是否启用缓存
      * @param array $cacheData  缓存数据
      */
-    function __construct($contentType = "text/html", $templateName = '', $layout = '', $theme = '', $cachingEnabled = false, $cacheData = Array()) {
+    function __construct($contentType = "text/html", $templateName = '', $layout = '', $_module = '', $cachingEnabled = false, $cacheData = Array()) {
         // set a default content type and character set for responses
         $this->_contentType = $contentType;
-        $this->_theme = $theme;
+        $this->_module = $_module;
         $this->_templateName = $templateName;
         $this->_layout = $layout;
         $this->_cachingEnabled = $cachingEnabled;
@@ -134,7 +135,7 @@ class View {
     public function getTemplate() {
         if (!is_object($this->_template)) {
             if (self::_default_template === 'smarty') {
-                $this->_template = new Smarty_View($this->_templateName, APP_ROOT_PATH . "templates" . DS . $this->_theme . DS . $this->_layout, $this->_cachingEnabled, $this->_cacheData);
+                $this->_template = new Smarty_View($this->_templateName, APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $this->_layout, $this->_cachingEnabled, $this->_cacheData);
             }
         }
         return $this->_template;
@@ -156,7 +157,7 @@ class View {
      * @param string $dir 模版目录
      */
     public function setTemplateDir($dir) {
-        $this->getTemplate()->setTemplateDir(APP_ROOT_PATH . "templates" . DS . $this->_theme . DS . $dir);
+        $this->getTemplate()->setTemplateDir(APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $dir);
     }
     /**
      *
