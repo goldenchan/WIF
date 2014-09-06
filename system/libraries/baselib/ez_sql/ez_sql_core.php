@@ -1,7 +1,7 @@
 <?php
 
 	/**********************************************************************
-	*  Author: Justin Vincent (jv@vip.ie)
+	*  Author: Justin Vincent (jvvip.ie)
 	*  Web...: http://justinvincent.com
 	*  Name..: ezSQL
 	*  Desc..: ezSQL Core module - database abstraction library to make
@@ -555,7 +555,7 @@
 		*
 		*  Usage:
 		*
-		*     $db_data = array('login'=>'jv','email'=>'jv@vip.ie', 'user_id' => 1, 'created' => 'NOW()');
+		*     $db_data = array('login'=>'jv','email'=>'jvvip.ie', 'user_id' => 1, 'created' => 'NOW()');
 		*
 		*     $db->query("INSERT INTO users SET ".$db->get_set($db_data));
 		*
@@ -565,7 +565,7 @@
 		*
 		* Output:
 		*
-		*     login = 'jv', email = 'jv@vip.ie', user_id = 1, created = NOW()
+		*     login = 'jv', email = 'jvvip.ie', user_id = 1, created = NOW()
 		*/
 	
 		function get_set($parms)

@@ -79,7 +79,7 @@ abstract class App_Controller extends Controller {
      * @see Controller:view();
      */
     public function view($reload = false) {
-        if (!is_object($this->_appview)) {
+        if (!isset($this->_appview)) {
             if ($this->content_type === 'text/html') {
                 //$this->disableHttpCache();
                 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -92,9 +92,7 @@ abstract class App_Controller extends Controller {
                     parent::view()->setValue('c_props', array(
                         'action' => $this->action,
                         'name' => $this->name
-                    ));
-                    //parent::view()->setValue('c_props',my_get_object_vars($this));//当前控制器的所有public属性数组
-                    
+                    ));                    
                 }
             }
             $this->_appview = parent::view();

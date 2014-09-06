@@ -6,6 +6,11 @@
  //
  // Author: Chenjin (wind.golden@gmail.com)
  */
+if(isset($_GET['debug']))
+{
+    xhprof_enable(XHPROF_FLAGS_CPU+XHPROF_FLAGS_MEMORY);
+    $xhprof = true;
+}
 /**
  * 目录分割符
  */
@@ -31,3 +36,15 @@ $router->route(WI_CONFIG::$routes)->default_route(array(
     'default/Default',
     'error404'
 ))->execute();
+if(isset($xhprof))
+{
+    $xhprof_data = xhprof_disable();  
+    $XHPROF_ROOT = '/Users/golden/Sites/';
+    include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_lib.php";
+    include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_runs.php";
+
+    $xhprof_runs = new XHProfRuns_Default();
+    $run_id = $xhprof_runs->save_run($xhprof_data, "xhprof_foo");
+
+    echo "<a target=_blank href=http://localhost/html/xhprof_html/index.php?run=$run_id&source=xhprof_foo>xhProf</a>";
+}

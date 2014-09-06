@@ -214,7 +214,7 @@ class Router {
                 $k = trim($callback[1], '<>');
                 if (strpos($callback[1], '<') === 0 && isset($params[$k])) {
                     $action = lcfirst(word_camelcase(str_replace('.', '_', $params[$k])));
-                    $callback = (!method_exists($controller . '_Controller', $action) ? $this->default_route : array(
+                    $callback = (!method_exists(ucfirst($controller) . '_Controller', $action) ? $this->default_route : array(
                         $callback[0],
                         $action
                     ));
@@ -229,9 +229,9 @@ class Router {
             }
         }
         // Was a match found or should we execute the default callback?
-        if (!$matched_route && $this->default_route !== NULL) {
+        if (!$matched_route && isset($this->default_route)) {
             $this->callback = $this->default_route;
-            self::$params = $this->url_clean;
+            self::$params = array('_URL'=>$this->url_clean);
             $this->route = FALSE;            
         }
     }
@@ -245,12 +245,12 @@ class Router {
      * @return boolean False if the callback cannot be executed, true otherwise
      */
     public function dispatch() {
-        if ($this->callback == NULL || self::$params == NULL) {
+        if ($this->callback == NULL || !isset(self::$params)) {
             throw new Exception('No callback or parameters found, please run $router->run() before $router->dispatch()');
             return FALSE;
         }
         //hack by chenjin 20130317 check if the router is for the controller class
-        self::$controller = substr($this->callback[0],strlen(self::$module)+1);
+        self::$controller = ucfirst(substr($this->callback[0],strlen(self::$module)+1));
         self::$action = $this->callback[1];
         $real_controller_name = self::$controller."_Controller";
         $function_return = call_user_func_array(array(

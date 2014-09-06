@@ -24,25 +24,16 @@ class Db_Base {
      * will initialize a connection based on its information. If it is unable to start a new database connection, this
      * method wil stop all processing and display an error message.
      *
+     * @param string $dsn 连接串
+     * @param string $user 用户名
+     * @param string $password 密码
      * @return Returns a reference to a PDb driver, with a working connection to the database.
      */
-    public static function &getDb() {
-        if (!isset(self::$db) || self::$db == null) {
-            $username = WI_CONFIG::$mysql_dbuser;
-            $password = WI_CONFIG::$mysql_dbpassword;
-            $dbname = WI_CONFIG::$mysql_dbname;
-            $host = WI_CONFIG::$mysql_dbhost;
-            $dbcharset = WI_CONFIG::$mysql_dbcharset;
-            require __DIR__ . DS . 'baselib' . DS . "class.wi_mysql.php";
-            self::$db = new WI_MySQL($username, $password, $dbname, $host, $dbcharset);
-            if (!self::$db->quick_connect($username, $password, $dbname, $host, $dbcharset)) {
-                $message = "Fatal error: could not connect to the database! erroMsg:" . self::$db->last_error;
-                throw (new Exception($message));
-                die();
-            }
-            self::$db->from_disk_cache = false;
-            self::$db->use_disk_cache = false;
-        }
+    public static function getDb($dsn,$user,$password) {
+        include __DIR__ . DS . 'baselib' . DS . "class.wi_pdo.php";
+        self::$db = new WI_PDO($dsn, $user, $password);
+        self::$db->from_disk_cache = false;
+        self::$db->use_disk_cache = false;
         return self::$db;
     }
 }

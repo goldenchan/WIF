@@ -46,10 +46,10 @@ class WI_Bootstrap {
          * 注册autoload函数
          */
         spl_autoload_register('auto_load');
-        set_error_handler(array(
-            new Error_Handler() ,
-            'runtimeError'
-        ));
+        //set_error_handler(array(
+        //    new Error_Handler() ,
+        //    'runtimeError'
+        //));
         set_exception_handler(array(
             new Exception_Handler() ,
             'runtimeException'

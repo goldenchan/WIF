@@ -166,7 +166,7 @@ function newCtrler($controller_name = 'default/default', $action = null) {
  */
 function newModel($model_name = "users") {
     if (strtolower($model_name) == 'app') exit("invalid model name!\n");
-    $classname = word_camelcase($model_name);
+    $classname = ucfirst($model_name);
     $content = '<?php
 /**
  * ' . $classname . 'Model封装文件
@@ -179,7 +179,14 @@ function newModel($model_name = "users") {
  */
  Class ' . $classname . '_Model extends App_Model
 {
-	/**
+    /**
+     * 数据源
+     * @var string
+     * @see WI_CONFIG::$dbs
+     */
+    
+    var $dbs = "default";
+    /**
      * 无前缀的表名
      * @var string
      */
@@ -216,13 +223,13 @@ function newTpl($tpl_data = 'default/default/index') {
     $file_name = strtolower($tmps[0]) . DS . strtolower($tmps[1]) . '/' . strtolower($tmps[2]);
     $content = '{**
 * module:' . strtolower($tmps[0]) . ' controller:' . strtolower($tmps[1]) . ' action:' . strtolower($tmps[2]) . '
-* @file application/templates/' . $file_name. WI_CONFIG::$smarty_tpl_ext . '
+* @file application/templates/' . $file_name. WI_CONFIG::$tpl_ext . '
 * @author Developer(developer@gmail.com)
 * @date ' . date('Y-m-d H:i:s') . '
 */		
 **}
 ';
-    if (file_exists(APP_ROOT_PATH . DS . 'templates' . DS . $file_name . WI_CONFIG::$smarty_tpl_ext)) exit("template file " . strtolower($tmps[0]) . DS . strtolower($tmps[1]) . ".tpl already exists!\n");
+    if (file_exists(APP_ROOT_PATH . DS . 'templates' . DS . $file_name . WI_CONFIG::$tpl_ext)) exit("template file " . $file_name . ".tpl already exists!\n");
     create_dir(APP_ROOT_PATH . DS . 'templates' . DS . strtolower($tmps[0]) . DS . strtolower($tmps[1]));
-    write_file(APP_ROOT_PATH . DS . 'templates' . DS .$file_name . WI_CONFIG::$smarty_tpl_ext, $content, 0777);
+    write_file(APP_ROOT_PATH . DS . 'templates' . DS .$file_name . WI_CONFIG::$tpl_ext, $content, 0777);
 }

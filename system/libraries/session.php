@@ -24,22 +24,21 @@ class Session {
      * session 存储方式
      * @var string
      */
-    private $storage = 'file'; // file 或者 db
-    
+    private $storage = 'file'; // file 或者 db    
     /**
      * 构造函数
      */
     function __construct() {
-        $currentCookieParams = session_get_cookie_params();
-        $time = time();
-        if (isset($_SESSION['LAST_ACTIVITY']) && ($time - $_SESSION['LAST_ACTIVITY'] > $currentCookieParams["lifetime"])) {
-            // last request was more than expired seconds
-            session_unset(); // unset $_SESSION variable for the run-time
-            session_destroy(); // destroy session data in storage
-            
+        if(isset($_SESSION['write']) && $_SESSION['write']){//是否有用户写入session
+            $currentCookieParams = session_get_cookie_params();
+            $time = time();
+            if (isset($_SESSION['LAST_ACTIVITY']) && ($time - $_SESSION['LAST_ACTIVITY'] > $currentCookieParams["lifetime"])) {
+                // last request was more than expired seconds
+                session_unset(); // unset $_SESSION variable for the run-time
+                session_destroy(); // destroy session data in storage
+            }
+            $_SESSION['LAST_ACTIVITY'] = $time; // update last activity time stamp
         }
-        $_SESSION['LAST_ACTIVITY'] = $time; // update last activity time stamp
-        
     }
     /**
      * 根据ID读取sesion
@@ -72,6 +71,7 @@ class Session {
      * @return boolean true or false
      */
     function write($sid, $data) {
+        !isset($_SESSION['write']) && $_SESSION['write'] = true;
         if (is_object($this->session_model)) {
             return $this->session_model->save(array(
                 'id' => $sid,

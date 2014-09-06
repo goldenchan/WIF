@@ -1,7 +1,7 @@
 <?php
 
 	/**********************************************************************
-	*  Author: Justin Vincent (jv@jvmultimedia.com)
+	*  Author: Justin Vincent (jvjvmultimedia.com)
 	*  Web...: http://twitter.com/justinvincent
 	*  Name..: ezSQL_mysql
 	*  Desc..: mySQL component (part of ezSQL databse abstraction library)
@@ -56,11 +56,11 @@
 		*  and select a mySQL database at the same time
 		*/
 
-		function quick_connect($dbuser='', $dbpassword='', $dbname='', $dbhost='localhost', $encoding='')
+		function quick_connect()
 		{
 			$return_val = false;
-			if ( ! $this->connect($dbuser, $dbpassword, $dbhost,true) ) ;
-			else if ( ! $this->select($dbname,$encoding) ) ;
+			if ( ! $this->connect($this->dbuser, $this->dbpassword, $this->dbhost,true) ) ;
+			else if ( ! $this->select($this->dbname,$this->encoding) ) ;
 			else $return_val = true;
 			return $return_val;
 		}
@@ -83,7 +83,7 @@
 				$this->show_errors ? trigger_error($ezsql_mysql_str[1],E_USER_WARNING) : null;
 			}
 			// Try to establish the server database handle
-			else if ( ! $this->dbh = @mysql_connect($dbhost,$dbuser,$dbpassword,true,131074) )
+			else if ( ! $this->dbh = mysql_connect($dbhost,$dbuser,$dbpassword,true,131074) )
 			{
 				$this->register_error($ezsql_mysql_str[2].' in '.__FILE__.' on line '.__LINE__);
 				$this->show_errors ? trigger_error($ezsql_mysql_str[2],E_USER_WARNING) : null;
@@ -122,10 +122,10 @@
 			}
 
 			// Try to connect to the database
-			else if ( !@mysql_select_db($dbname,$this->dbh) )
+			else if ( !mysql_select_db($dbname,$this->dbh) )
 			{
 				// Try to get error supplied by mysql if not use our own
-				if ( !$str = @mysql_error($this->dbh))
+				if ( !$str = mysql_error($this->dbh))
 					  $str = $ezsql_mysql_str[5];
 
 				$this->register_error($str.' in '.__FILE__.' on line '.__LINE__);
@@ -246,10 +246,10 @@
 			}*/
 			
 			// Perform the query via std mysql_query function..
-			$this->result = @mysql_query($query,$this->dbh);
+			$this->result = mysql_query($query,$this->dbh);
 
 			// If there is an error then take note of it..
-			if ( $str = @mysql_error($this->dbh) )
+			if ( $str = mysql_error($this->dbh) )
 			{
 				$is_insert = true;
 				
@@ -264,12 +264,12 @@
 			$is_insert = false;
 			if ( preg_match("/^(insert|delete|update|replace|truncate|drop|create|alter)\s+/i",$query) )
 			{
-				$this->rows_affected = @mysql_affected_rows($this->dbh);
+				$this->rows_affected = mysql_affected_rows($this->dbh);
 
 				// Take note of the insert_id
 				if ( preg_match("/^(insert|replace)\s+/i",$query) )
 				{
-					$this->insert_id = @mysql_insert_id($this->dbh);
+					$this->insert_id = mysql_insert_id($this->dbh);
 				}
 
 				// Return number fo rows affected
@@ -281,22 +281,22 @@
 
 				// Take note of column info
 				$i=0;
-				while ($i < @mysql_num_fields($this->result))
+				while ($i < mysql_num_fields($this->result))
 				{
-					$this->col_info[$i] = @mysql_fetch_field($this->result);
+					$this->col_info[$i] = mysql_fetch_field($this->result);
 					$i++;
 				}
 
 				// Store Query Results
 				$num_rows=0;
-				while ( $row = @mysql_fetch_object($this->result) )
+				while ( $row = mysql_fetch_object($this->result) )
 				{
 					// Store relults as an objects within main array
 					$this->last_result[$num_rows] = $row;
 					$num_rows++;
 				}
 
-				@mysql_free_result($this->result);
+				mysql_free_result($this->result);
 
 				// Log number of rows the query returned
 				$this->num_rows = $num_rows;
@@ -330,7 +330,7 @@
 
 		function disconnect()
 		{
-			@mysql_close($this->dbh);	
+			mysql_close($this->dbh);	
 		}
 
 	}

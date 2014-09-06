@@ -39,7 +39,7 @@
 		function ezSQL_pdo($dsn='', $user='', $password='', $ssl=array())
 		{
 			// Turn on track errors 
-			ini_set('track_errors',1);
+			//ini_set('track_errors',1);
 			
 			if ( $dsn && $user && $password )
 			{

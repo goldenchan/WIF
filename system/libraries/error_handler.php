@@ -13,7 +13,7 @@ class Error_Handler {
      * 构造器
      */
     function __construct() {
-        register_shutdown_function(array(&$this,
+        register_shutdown_function(array($this,
             'shutdownError'
         ));
     }
@@ -22,7 +22,7 @@ class Error_Handler {
      */
     public function runtimeError() {
         // if error has been supressed with an @
-        if (error_reporting() == 0) {
+        if (error_reporting() === 0) {
             return;
         }
         // check if function has been called by an exception
@@ -162,9 +162,9 @@ class Error_Handler {
             $errfile = $error["file"];
             $errline = $error["line"];
             $errstr = $error["message"];
-            if (ini_get('display_errors') === "1") {
+            //if (ini_get('display_errors') === "1") {
                 echo $this->format_error($errno, $errstr, $errfile, $errline);
-            }
+            //}
             //发送到邮箱或日志
             
         }

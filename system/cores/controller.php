@@ -197,7 +197,7 @@ abstract class Controller {
      * @access public
      */
     public function view($reload = false) {
-        if (!is_object($this->_view) || $reload) {
+        if (!isset($this->_view) || $reload) {
             if ($this->content_type === 'text/html') {
                 $tpl_path = $this->name;
                 $tpl_filename =  $this->action;

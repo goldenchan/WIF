@@ -30,7 +30,7 @@ class Cached_Template extends Template {
         $this->getSmarty()->caching = true;
         $this->getSmarty()->cache_lifetime = $cacheLifetime;
         $tmp = md5($templateFile);
-        $this->getSmarty()->setCacheDir(TMP . WI_CONFIG::$smarty_cache_dir . DS . $tmp{0} . $tmp{1});
+        $this->getSmarty()->setCacheDir(TMP . WI_CONFIG::$smarty['cache_dir'] . DS . $tmp{0} . $tmp{1});
     }
     /**
      * Renders the template and returns the contents as an string

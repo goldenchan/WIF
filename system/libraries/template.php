@@ -56,12 +56,12 @@ class Template {
         // create the Smarty object and set the security values
         $this->_templateFile = $templateFile;
         $this->template_dir = $templateDir;
-        $this->tpl_ext = WI_CONFIG::$smarty_tpl_ext;
-        $this->_trimwhitespace = WI_CONFIG::$trim_white_space;
+        $this->tpl_ext = WI_CONFIG::$tpl_ext;
+        $this->_trimwhitespace = WI_CONFIG::$smarty['trim_white_space'];
         // default folders
-        $this->getSmarty()->compile_check = WI_CONFIG::$smarty_compile_check;
-        $this->getSmarty()->setConfigDir(WI_CONFIG::$smarty_config_dir);
-        $this->getSmarty()->setCompileDir(TMP . WI_CONFIG::$smarty_compile_dir);
+        $this->getSmarty()->compile_check = WI_CONFIG::$smarty['compile_check'];
+        $this->getSmarty()->setConfigDir(WI_CONFIG::$smarty['config_dir']);
+        $this->getSmarty()->setCompileDir(TMP . WI_CONFIG::$smarty['compile_dir']);
         // register dynamic block for every template instance
         //$this->getSmarty()->registerPlugin('block', 'dynamic', 'smarty_block_dynamic', false);
         

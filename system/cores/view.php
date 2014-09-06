@@ -3,15 +3,11 @@
  * View基础类
  * @Copyright, Chenjin, 2008, All Rights Reserved.
  * @package view
- *
  * @author: Chenjin (wind.golden@gmail.com)
- *
- *
  */
 /** 
  *
  * Base class with basic methods related to views. This class should not be used directly.
- *
  * This base View class does not know anything about cached views either.
  */
 class View {
@@ -19,7 +15,7 @@ class View {
      * 所有模版变量数组
      * @var array
      */
-    var $_params;
+    var $_params = array();
     /**
      * 内容格式
      * @var string
@@ -79,21 +75,21 @@ class View {
      * @var object
      * @access private
      */
-    var $_template;
+    var $_template = null;
     /**
      * 默认模版名
-     * @const string
+     * @var string
      * @access private
      */
-    const _default_template = 'smarty';
+    var $_default_template = 'Simple_View';
     /**
      * 可支持模版名
      * @var array
      * @access private
      */
     var $_templates_support = array(
-        'smarty',
-        'simple'
+        'Smarty_View',
+        'Simple_View'
     );
     /**
      * 跨域
@@ -107,7 +103,7 @@ class View {
      * @param string $contentType 输出内容类型
      * @param string $templateName 模版名
      * @param string $layout 模版所在目录
-     * @param string $theme 主题目录（目录结构: $theme/$layout/$templateName）
+     * @param string $_module module名
      * @param boolean $cachingEnabled 是否启用缓存
      * @param array $cacheData  缓存数据
      */
@@ -121,22 +117,18 @@ class View {
         $this->_cacheData = $cacheData;
         $this->_charset = 'utf-8';
         $this->_headers = Array();
+        $this->_default_template = WI_CONFIG::$default_template_class;
         // let's send an HTTP 200 header response... If somebody wants to overwrite it later
         // on, php should keep in mind that the valid one will be the last one so it is
         // fine to do this more than once and twice
         $this->addHeaderResponse("HTTP/1.0 200 OK");
     }
     /**
-     *
      * 获取模板对象
-     *
-     *
      */
     public function getTemplate() {
-        if (!is_object($this->_template)) {
-            if (self::_default_template === 'smarty') {
-                $this->_template = new Smarty_View($this->_templateName, APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $this->_layout, $this->_cachingEnabled, $this->_cacheData);
-            }
+        if (!isset($this->_template)) {
+            $this->_template = new $this->_default_template($this->_templateName, APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $this->_layout, $this->_cachingEnabled, $this->_cacheData);
         }
         return $this->_template;
     }
@@ -282,43 +274,6 @@ class View {
         return true;
     }
     /**
-     * stores a value in the session, associated to one key, in case
-     * the view wants to keep some value for later use such as filter settings
-     * for persisten listings, etc.
-     * @deprecated
-     * @param string $param session变量名
-     * @param string $value session变量值
-     * @return boolean true
-     */
-    public function setSessionValue($param, $value) {
-        // if there is no session data, there's nothing for us to set
-        if (!is_array($_SESSION)) return false;
-        $viewName = get_class($this);
-        $keyName = "{$viewName}_{$param}";
-        $_SESSION["$keyName"] = $value;
-        return true;
-    }
-    /** 
-     * retrieves a parameter from the session
-     * @deprecated
-     * @param string $param session变量名
-     * @param string $defaultValue session变量值
-     * @return array  The value associated to the parameter or empty if not
-     * found
-     */
-    public function getSessionValue($param, $defaultValue = "") {
-        // if there is no session data, there's nothing for us to look for
-        if (!is_array($_SESSION)) return false;
-        $viewName = get_class($this);
-        $keyName = "{$viewName}_{$param}";
-        if (isset($_SESSION[$keyName]) && !empty($_SESSION[$keyName])) {
-            return $_SESSION[$keyName];
-        }
-        else {
-            return $defaultValue;
-        }
-    }
-    /**
      *
      * fetch模版所有变量.
      *
@@ -327,22 +282,16 @@ class View {
      * @return string 模版输出代码
      */
     public function fetch($template_file = '') {
-        if ($this->_contentType === "text/html") {
-            //添加对自定义模板文件的支持 added by chenjin 20130613
-            if ($template_file !== '' && strpos($template_file, '/') !== false) {
-                $tmp = explode('/', $template_file);
-                $this->setTemplateDir($tmp[0]);
-                $this->setTemplateFile($tmp[1]);
-            }
-            // pass all the values to the template object
-            $this->getTemplate()->assignAll($this->_params);
-            // and finally send them after calling the pre-processing method
-            return $this->getTemplate()->fetch($this->getTemplate()->getSmartyViewId());
+        //添加对自定义模板文件的支持 added by chenjin 20130613
+        if ($template_file !== '' && strpos($template_file, '/') !== false) {
+            $tmp = explode('/', $template_file);
+            $this->setTemplateDir($tmp[0]);
+            $this->setTemplateFile($tmp[1]);
         }
-        else {
-            $p = array_values($this->_params);
-            return $this->specialFetch($p[0]);
-        }
+        // pass all the values to the template object
+        $this->getTemplate()->assignAll($this->_params);
+        // and finally send them after calling the pre-processing method
+        return $this->getTemplate()->fetch($this->getTemplate()->getViewId());
     }
     /**
      * Renders the view. 默认不需要传递模版文件相对路径（$dir/$tpl_file格式）参数，会根据控制器和Action名去找文件
@@ -356,40 +305,13 @@ class View {
             header($header);
         }
         $this->sendContentType();
-        if ($this->_contentType === "text/html") {
-            //添加对自定义模板文件的支持 added by chenjin 20130613
-            if ($template_file !== '' && strpos($template_file, '/') !== false) {
-                $tmp = explode('/', $template_file);
-                $this->setTemplateDir($tmp[0]);
-                $this->setTemplateFile($tmp[1]);
-            }
-            $this->getTemplate()->assignAll($this->_params);
-            $this->getTemplate()->render();
+        //添加对自定义模板文件的支持 added by chenjin 20130613
+        if ($template_file !== '' && strpos($template_file, '/') !== false) {
+            $tmp = explode('/', $template_file);
+            $this->setTemplateDir($tmp[0]);
+            $this->setTemplateFile($tmp[1]);
         }
-        elseif (isset($this->_params)) {
-            $p = array_values($this->_params);
-            echo $this->specialFetch($p[0]);
-        }
-    }
-    /**
-     * 输出其他格式请求的响应  text/plainformat string 输出的格式 json or xml or plain
-     *@param array $content 要输出的内容，(json内容格式可为(string,array); xml内容格式为(xml结构的string));plain,html,javascript内容格式为(string)
-     *@return boolean 条件不符合时返回false,无输出 否则输出响应
-     */
-    private function specialFetch($content) {
-        if (count($content) === 0) {
-            return '';
-        }
-        if ($this->_contentType === 'text/plain') {
-            $content_for_json = json_encode($content);
-            $output = ($this->_crossDomain && isset($_GET['jsoncallback'])) ? $_GET['jsoncallback'] . "($content_for_json)" : $content_for_json;
-        }
-        else if ($this->_contentType === 'text/xml') {
-            $content_for_xml = array2xml($content);
-            $output = '<' . '?xml version="1.0" encoding="' . $this->_charset . '" ?' . '>' . "\n";
-            $output.= '<response>' . $content_for_xml . '</response>';
-        }
-        return $output;
+        $this->getTemplate()->assignAll($this->_params)->render();
     }
     /**
      * GET中增加 etag 和 lastModified 信息

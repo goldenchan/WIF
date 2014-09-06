@@ -13,47 +13,47 @@ abstract class Model {
      * db 对象
      * @var object
      */
-    var $_db;
+    protected $_db;
     /**
      * 表前缀
      * @var string
      */
-    var $_prefix = null;
+    protected $_prefix = null;
     /**
      * 数据库是否初始化
      *@var boolean
      */
-    var $_dbInitialized = false;
+    protected $_dbInitialized = false;
     /**
      * 最后一条错误
      * @var string
      */
-    var $_lastError = "";
+    protected $_lastError = "";
     /**
      * 正则验证
      * @var array 每个字段一个数组元素 比如 array('mobile'=>'/13[\d]{9}/')
      */
-    var $validate_preg = null;
+    public $validate_preg = null;
     /**
      * 不带前缀的表名
      * @var string
      */
-    var $table;
+    public $table;
     /**
      * 表结构信息
      * @var string
      */
-    var $_table_info = null;
+    protected $_table_info = null;
     /**
      * 主键名
      * @var string
      */
-    var $primary_key = null;
+    public $primary_key = null;
     /**
      * 支持的缓存类型
      *@var array
      */
-    var $support_caches = array(
+    public $support_caches = array(
         'file',
         'mem',
         'redis',
@@ -63,27 +63,32 @@ abstract class Model {
      * 缓存类名
      * @var string file mem redis sqlite
      */
-    var $cache = null;
+    public $cache = null;
     /**
      * 主键值
      * @var int|string
      */
-    var $_primary_key_value = null;
+    protected $_primary_key_value = null;
     /**
      * debug
      * @var boolean
      */
-    var $debug = false;
+    public $debug = false;
     /**
      * 是否事务处理
      */
-    var $_in_transaction = false;
+    protected $_in_transaction = false;
+    /**
+     * 数据源
+     * @see WI_CONFIG::$dbs
+     */
+    protected $_dsn = 'default'; 
     /**
      * 构造函数
      * @param string $default_cache_type 缓存类型
      */
     function __construct($default_cache_type = 'file') {
-        default_value($this->_prefix, WI_CONFIG::$mysql_tbprefix);
+        default_value($this->_prefix, WI_CONFIG::$dbs[$this->_dsn]['table_prefix']);
         if (in_array($default_cache_type, $this->support_caches)) {
             $this->setModelCache($default_cache_type);
         }
@@ -101,12 +106,12 @@ abstract class Model {
     public function _initializeDb() {
         if (!$this->_dbInitialized) {
             $db_base = new Db_Base();
-            $this->_db = $db_base->getDb();
+            $this->_db = $db_base->getDb(WI_CONFIG::$dbs[$this->_dsn]['dsn'], WI_CONFIG::$dbs[$this->_dsn]['user'],  WI_CONFIG::$dbs[$this->_dsn]['password']);
             $this->_dbInitialized = true;
             $this->_db->do_profile = $this->_db->use_trace_log = $this->debug;
         }
         return $this;
-    }
+}
     /**
      * 获得数据库Handler 
      * return handler object
@@ -156,16 +161,6 @@ abstract class Model {
      */
     public function DbError() {
         return $this->_lastError;
-    }
-    /**
-     * 数据库切换
-     * @param string $db_name 数据库名
-     * @param string $encoding 字符集
-     */
-    protected function selectDb($db_name, $encoding = 'utf8') {
-        $this->_initializeDb();
-        $this->_db->select($db_name, $encoding);
-        return $this;
     }
     /**
      * 表切换
@@ -687,8 +682,9 @@ abstract class Model {
     * @param object $dbh mysql 数据库Handler
     * @return string 经过escape的SQL串
 	*/
-	public function mysqlEscape($str,$dbh=null){
-		return mysql_real_escape_string($str,$dbh);
+    public function mysqlEscape($str,$dbh=null){
+        //$dbh->prepare($str);
+		return mysql_real_escape_string($str);
 		//return mysql_escape_string($str);
 	}
 	/**
