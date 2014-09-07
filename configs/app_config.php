@@ -38,7 +38,7 @@ class WI_CONFIG {
     /**
      * 默认模板类名
      */
-    public static $default_template_class = 'Smarty_View';//Simple_View or Smarty_View
+    public static $default_template_class = 'Simple_View';//Simple_View or Smarty_View
     /**
      * 模板后缀
      * @var string
