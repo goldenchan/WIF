@@ -9,46 +9,52 @@
  */
 define('SITE_DOMAIN', '127.0.0.1');
 /**
- * cookie域名
- */
-define('COOKIE_DOMAIN', '127.0.0.1');
-/**
  * 全站基本配置信息 所有的基本配置都应放在这个WI_CONFIG 类的静态属性中
  */
 class WI_CONFIG {
     /**
-     * 数据库配置
+     * 数据库配置 默认选default 
      * @var array
      */
     public static $dbs = array(
-        'default'=>array('dsn'=>'mysql:host=localhost;dbname=db_wi;charset=utf8','user'=>'root','password'=>'123456','table_prefix'=>'wi_'),   //db1
-        'remote'=> array('dsn'=>'mysql:host=localhost;dbname=db_ch;charset=utf8','user'=>'root','password'=>'123456','table_prefix'=>'ch_'),
-    );   
+        'default' => array(
+            'dsn' => 'mysql:host=localhost;dbname=db_wi;charset=utf8',
+            'user' => 'root',
+            'password' => '123456',
+            'table_prefix' => 'wi_'
+        ) ,
+        'remote' => array(
+            'dsn' => 'mysql:host=localhost;dbname=db_ch;charset=utf8',
+            'user' => 'root',
+            'password' => '123456',
+            'table_prefix' => 'ch_'
+        ) ,
+    );
     /**
      * smarty 配置
      * @var array
      */
     public static $smarty = array(
-        'compile_dir'=>'templates_c',
-        'config_dir'=>LANG_PATH,
-        'cache_dir'=>'view',
-        'compile_check'=>true,
-        'trim_white_space'=>true
+        'compile_dir' => 'templates_c',
+        'config_dir' => LANG_PATH,
+        'cache_dir' => 'view',
+        'compile_check' => true,
+        'trim_white_space' => true
     );
     /**
-     * 默认模板类名
+     * 默认模板类名 Simple_View or Smarty_View
      */
-    public static $default_template_class = 'Simple_View';//Simple_View or Smarty_View
+    public static $default_template_class = 'Simple_View';
     /**
      * 模板后缀
      * @var string
      */
     public static $tpl_ext = '.tpl';
     /**
-     * session 存储方式
+     * session 存储方式 目前只支持文件
      * @var string
      */
-    public static $session_storage = 'file'; //session 存储方式，目前只支持文件    
+    public static $session_storage = 'file';
     /**
      * 路由映射
      * @var array
@@ -62,6 +68,6 @@ class WI_CONFIG {
         '/' => array(
             'default',
             'index'
-        ) 
+        )
     );
 }
