@@ -55,6 +55,11 @@ class Simple_View {
      */
     var $_debug = false;
     /**
+     * module
+     * @var string
+     */
+    var $_module ;
+    /**
      * Constructor of the class
      *
      * @param $templateName A template name
@@ -63,10 +68,11 @@ class Simple_View {
      * @param $data Data that will be used to generate a unique id for the cached view (it will be ignored
      * if caching is not enabled)
      */
-    function __construct($templateName, $layout, $cachingEnabled = false, $data = array()) {
+    function __construct($templateName, $layout, $module = 'default',$cachingEnabled = false, $data = array()) {
         // name of the tepmlate
         $this->_templateName = $templateName;
         $this->_templateLayout = $layout;
+        $this->_module = $module;
     }
     /**
      * set to debug mode for smarty
@@ -125,6 +131,14 @@ class Simple_View {
     function getViewId() {
         return true;
     }
+    /**
+     * incude其他模板 只能在当前module下
+     * @param string $tpl_relative_path 同一module下面的不带后缀的路径 比如 $this->includeTpl('layout/menu');
+     */
+    public function includeTpl($tpl_relative_path){
+        extract($this->_params, EXTR_PREFIX_SAME, "wddx");
+        include APP_ROOT_PATH . "templates" . DS .$this->_module.DS.$tpl_relative_path.WI_CONFIG::$tpl_ext;
+    }
 
     /**
      * Renders the view using the Smarty template object that we created in the constructor. This method
@@ -135,7 +149,7 @@ class Simple_View {
      */
     function render() {
         extract($this->_params, EXTR_PREFIX_SAME, "wddx");
-        include $this->_templateLayout.DS.$this->_templateName.WI_CONFIG::$tpl_ext;
+        include APP_ROOT_PATH . "templates" . DS .$this->_module.DS.$this->_templateLayout.DS.$this->_templateName.WI_CONFIG::$tpl_ext;
     }
     /**
      * Renders the view using the Smarty template object that we created in the constructor. This method

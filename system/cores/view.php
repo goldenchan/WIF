@@ -117,7 +117,7 @@ class View {
         $this->_cacheData = $cacheData;
         $this->_charset = 'utf-8';
         $this->_headers = Array();
-        $this->_default_template = WI_CONFIG::$default_template_class;
+        $this->_default_template = isset(WI_CONFIG::$default_template_class) ? WI_CONFIG::$default_template_class : $this->$_default_template;
         // let's send an HTTP 200 header response... If somebody wants to overwrite it later
         // on, php should keep in mind that the valid one will be the last one so it is
         // fine to do this more than once and twice
@@ -128,7 +128,7 @@ class View {
      */
     public function getTemplate() {
         if (!isset($this->_template)) {
-            $this->_template = new $this->_default_template($this->_templateName, APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $this->_layout, $this->_cachingEnabled, $this->_cacheData);
+            $this->_template = new $this->_default_template($this->_templateName, $this->_layout, $this->_module, $this->_cachingEnabled, $this->_cacheData);
         }
         return $this->_template;
     }
@@ -149,7 +149,7 @@ class View {
      * @param string $dir 模版目录
      */
     public function setTemplateDir($dir) {
-        $this->getTemplate()->setTemplateDir(APP_ROOT_PATH . "templates" . DS . $this->_module . DS . $dir);
+        $this->getTemplate()->setTemplateDir($dir);
     }
     /**
      *

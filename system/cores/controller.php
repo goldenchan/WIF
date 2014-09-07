@@ -2,7 +2,7 @@
 /**
  * 抽象控制器类
  * @package controller
- * @author		wind.golden@gmail.com(陈金)
+ * @author wind.golden@gmail.com(陈金)
  */
 /** 
  *

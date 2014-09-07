@@ -46,6 +46,11 @@ class Smarty_View {
      */
     var $_debug = false;
     /**
+     * module
+     * @var string
+     */
+    var $_module ;
+    /**
      * Constructor of the class
      *
      * @param $templateName A template name
@@ -56,21 +61,22 @@ class Smarty_View {
      * @param $data Data that will be used to generate a unique id for the cached view (it will be ignored
      * if caching is not enabled)
      */
-    function __construct($templateName, $layout, $cachingEnabled = false, $data = array()) {
+    function __construct($templateName, $layout, $module = 'default',$cachingEnabled = false, $data = array()) {
         // whether caching is enabled or not
         $this->_cachingEnabled = $cachingEnabled;
         // name of the tepmlate
         $this->_templateName = $templateName;
+        $this->_module = $module;
         if ($this->_cachingEnabled) {
             // get a CachedTemplate object
-            $this->_templateObject = new CachedTemplate($this->_templateName, $layout);
+            $this->_templateObject = new CachedTemplate($this->_templateName, APP_ROOT_PATH . "templates" . DS .$module . DS . $layout);
             // data used to calculate the view id
             $this->_data = !empty($data) ? $data : $_GET;
             $this->_viewId = $this->generateCacheId();
         }
         else {
             //require  dirname(__FILE__).DS.'template'.DS."/template.php" ;
-            $this->_templateObject = new Template($this->_templateName, $layout);
+            $this->_templateObject = new Template($this->_templateName, APP_ROOT_PATH . "templates" . DS .$module . DS . $layout);
         }
     }
     /**
@@ -85,7 +91,7 @@ class Smarty_View {
      * @param string $dir 模版目录
      */
     function setTemplateDir($dir) {
-        $this->_templateObject->setTemplateDir($dir);
+        $this->_templateObject->setTemplateDir(APP_ROOT_PATH . "templates" . DS .$this->module.DS.$dir);
     }
     /**
      * 设置模版文件
