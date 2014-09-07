@@ -1,7 +1,7 @@
 <?php
 /**
- * Name: class.wi_mysql.php
- * Description: 基于ez_sql的mysql操作类，简便快捷的进行mysql数据库操作
+ * Name: class.wi_pdo.php
+ * Description: 基于ez_sql的pdo操作类，简便快捷的进行pdo数据库操作
  * Created by: chenjin(wind.golden@gmail.com)
  * Project : wind_frame
  * Time: 2010-6-3
