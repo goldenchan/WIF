@@ -21,13 +21,13 @@ define('SYS_ROOT_PATH', dirname(__DIR__) . DS . 'system' . DS);
 /**
  * 加载应用配置
  */
-require dirname(__DIR__) . DS . 'configs'.DS.'app_config.php';
+require dirname(__DIR__) . DS . 'configs' . DS .'app_config.php';
 /**
  * bootstrap
  */
-require APP_ROOT_PATH . "bootstrap.php";
+require APP_ROOT_PATH  . "bootstrap.php";
 $router = new Router;
 $router->route(WI_CONFIG::$routes)->default_route(array(
-    'default/Default',
+    'Default',
     'error404'
 ))->execute();
