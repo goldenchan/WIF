@@ -37,9 +37,7 @@ class Db_Base {
      * will initialize a connection based on its information. If it is unable to start a new database connection, this
      * method wil stop all processing and display an error message.
      *
-     * @param string $dsn 连接串
-     * @param string $user 用户名
-     * @param string $password 密码
+     * @param string $dsn 数据源名
      * @return Returns a reference to a PDb driver, with a working connection to the database.
      */
     public static function getDb($dsn) {
