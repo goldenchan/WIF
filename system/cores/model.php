@@ -378,7 +378,7 @@ abstract class Model {
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $select_sql = $this->buildSqlScript('select', $this->table, array(
                 $this->primary_key
-            ) , $condition, 'mysql', $this->getDbo());
+            ) , $condition);
             $cache_keys = $this->execute($select_sql, 'col');
             foreach ($cache_keys as $cache_key) {
                 $this->cache->delete($cache_key, $cache_group, $condition);
@@ -401,7 +401,7 @@ abstract class Model {
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $select_sql = $this->buildSqlScript('select', $this->table, array(
                 $this->primary_key
-            ) , $condition, 'mysql', $this->getDbo());
+            ) , $condition);
             $cache_keys = $this->execute($select_sql, 'col');
             foreach ($cache_keys as $cache_key) {
                 $this->cache->update($cache_key, $cache_group, $update_info, $condition);
@@ -439,6 +439,7 @@ abstract class Model {
     }
     /**
      * 生成表结构信息并生成持久化缓存数据
+     * @todo pdo
      * @param string  $table_name  表名
      * @return array  table information
      */
