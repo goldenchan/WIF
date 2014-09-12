@@ -106,7 +106,7 @@ abstract class Model {
     public function _initializeDb() {
         if (!$this->_dbInitialized) {
             $db_base = new Db_Base();
-            $this->_db = $db_base->getDb(WI_CONFIG::$dbs[$this->_dsn]['dsn'], WI_CONFIG::$dbs[$this->_dsn]['user'],  WI_CONFIG::$dbs[$this->_dsn]['password']);
+            $this->_db = $db_base->getDb($this->_dsn);
             $this->_dbInitialized = true;
             $this->_db->do_profile = $this->_db->use_trace_log = $this->debug;
         }

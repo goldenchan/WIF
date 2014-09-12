@@ -253,6 +253,7 @@ class Router {
         self::$controller = ucfirst(substr($this->callback[0],strlen(self::$module)+1));
         self::$action = $this->callback[1];
         $real_controller_name = self::$controller."_Controller";
+        self::$controller = strtolower(self::$controller);
         $function_return = call_user_func_array(array(
             new $real_controller_name,
             self::$action
