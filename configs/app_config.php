@@ -18,10 +18,10 @@ class WI_CONFIG {
      */
     public static $dbs = array(
         'default' => array(
-            'dsn' => 'mysql:host=localhost;dbname=db_wi;charset=utf8',
+            'dsn' => 'mysql:host=localhost;dbname=db_wy;charset=utf8',
             'user' => 'root',
             'password' => '123456',
-            'table_prefix' => 'wi_'
+            'table_prefix' => 'wy_'
         ) ,
         'remote' => array(
             'dsn' => 'mysql:host=localhost;dbname=db_ch;charset=utf8',

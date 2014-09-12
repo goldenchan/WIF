@@ -22,7 +22,7 @@ class Default_Controller extends App_Controller {
      * @param $params array('_URL'=>'url ','_GET'=>'GET参数和值','_POST'=>'POST参数和值','FILES'=>'FILES参数和值')
      */
     public function index($params) { 
-        //return $this->model('Driver')->find(array('driver_name'=>'哈哈')); 自动把return的数组对象转成json串
+        //return $this->model('Driver')->getCount(array('driver_name'=>'哈哈2','driver_type'=>1)); //自动把return的数组对象转成json串
         $this->view()->render();
     }
     /**

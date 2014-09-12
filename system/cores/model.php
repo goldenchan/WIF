@@ -10,10 +10,18 @@
  */
 abstract class Model {
     /**
-     * db 对象
+     * db 句柄
      * @var object
      */
-    protected $_db;
+    protected $_pdo = null;
+    /**
+     * db 对象
+     */
+    protected $_dbo = null;
+    /**
+     * db statement 参数
+     */
+    protected $_stmtParams = array();
     /**
      * 表前缀
      * @var string
@@ -82,16 +90,14 @@ abstract class Model {
      * 数据源
      * @see WI_CONFIG::$dbs
      */
-    protected $_dsn = 'default'; 
+    protected $_dsn = 'default';
     /**
      * 构造函数
      * @param string $default_cache_type 缓存类型
      */
     function __construct($default_cache_type = 'file') {
         default_value($this->_prefix, WI_CONFIG::$dbs[$this->_dsn]['table_prefix']);
-        if (in_array($default_cache_type, $this->support_caches)) {
-            $this->setModelCache($default_cache_type);
-        }
+        $this->setModelCache($default_cache_type);
         if (is_string($this->table) && $this->table !== '') {
             $this->table = $this->_prefix . $this->table;
         }
@@ -104,20 +110,26 @@ abstract class Model {
      * @return model对象
      */
     public function _initializeDb() {
-        if (!$this->_dbInitialized) {
-            $db_base = new Db_Base();
-            $this->_db = $db_base->getDb($this->_dsn);
-            $this->_dbInitialized = true;
-            $this->_db->do_profile = $this->_db->use_trace_log = $this->debug;
+        if (!isset($this->_dbo)) {
+            $this->_dbo = new Db_Base();
+            $this->_pdo = $this->_dbo->getDb($this->_dsn);
+            $this->_dbo->do_profile = $this->_dbo->use_trace_log = $this->debug;
         }
         return $this;
-}
+    }
     /**
-     * 获得数据库Handler 
-     * return handler object
+     * 获得数据库Handler
+     * return db handler object
      */
-    public function getDbHandler() {
-        return $this->_initializeDb()->_db->dbh;
+    public function getPdo() {
+        return $this->_initializeDb()->_pdo;
+    }
+    /**
+     * 获得数据库对象
+     * return db object
+     */
+    public function getDbo() {
+        return $this->_initializeDb()->_dbo;
     }
     /**
      *  设置debug 模式
@@ -178,12 +190,12 @@ abstract class Model {
      * @param string $type 执行类型 其中 all(取所有) one（取一个） row（取一行） col（取一列） query（非select操作 比如update insert delete )
      * @return boolean|array 执行成功返回true 失败返回false
      */
-    public function execute($sql = '', $type = 'all') {
+    public function execute($sql = '', $type = 'all', $params = array()) {
         $function_list = array(
-            'one' => 'get_var',
-            'row' => 'get_row',
-            'col' => 'get_col',
-            'all' => 'get_results',
+            'one' => 'getVar',
+            'row' => 'getRow',
+            'col' => 'getCol',
+            'all' => 'getResults',
             'query' => 'query'
         );
         if (!isset($function_list[$type])) {
@@ -191,14 +203,7 @@ abstract class Model {
             return false;
         }
         $function = $function_list[$type];
-        $this->_initializeDb();
-        if (in_array($type, array(
-            'all',
-            'row'
-        ))) {
-            return $this->_db->$function($sql, ARRAY_A);
-        }
-        else return $this->_db->$function($sql);
+        return $this->getDbo()->$function($sql, $params);
     }
     /**
      * 事务处理 开始
@@ -207,8 +212,7 @@ abstract class Model {
      */
     public function startTransaction() {
         $this->_in_transaction = true;
-        $this->_initializeDb();
-        return $this->execute('START TRANSACTION;', 'query');
+        return $this->getPdo()->beginTransaction();
     }
     /**
      * 事务处理 提交
@@ -217,17 +221,16 @@ abstract class Model {
      */
     public function commit() {
         $this->_in_transaction = false;
-        $this->_initializeDb();
-        return $this->execute('COMMIT;', 'query');
+        return $this->getPdo()->commit();
     }
     /**
      * 事务处理 回滚
      * @note 用了事务的表无法用缓存 读写数据时候不能加缓存key和缓存组
      * @return model对象
      */
-    public function rollback() {
+    public function rollBack() {
         $this->_in_transaction = false;
-        return $this->execute('ROLLBACK;', 'query');
+        return $this->getPdo()->rollBack();
     }
     /**
      * 获取一条记录
@@ -241,9 +244,9 @@ abstract class Model {
     public function find($condition = array() , $return_fields = '*', $cache_key = null, $cache_group = null) {
         $result = array();
         $cache_available = isset($cache_group, $cache_key, $this->cache);
-        $cache_available  && $result = $this->cache->get($cache_key, $cache_group, $condition);
+        $cache_available && $result = $this->cache->get($cache_key, $cache_group, $condition);
         if (empty($result)) {
-            $select_sql = $this->_initializeDb()->buildSqlScript("select", $this->table, '*', $condition, 'mysql', $this->getDbHandler());
+            $select_sql = $this->buildSqlScript("select", $this->table, '*', $condition);
             $result = $this->execute($select_sql, 'row');
             if (!empty($result) && $cache_available) {
                 $this->cache->set($cache_key, $cache_group, $result);
@@ -302,8 +305,8 @@ abstract class Model {
      * @return boolean|int 成功则返回影响的行数, 失败返回false
      */
     public function update($update_info = array() , $condition = array() , $cache_key = null, $cache_group = null) {
-        $update_sql = $this->_initializeDb()->buildSqlScript('update', $this->table, $update_info, $condition, 'mysql', $this->getDbHandler());
-        $retval = $this->execute($update_sql, 'query');
+        $update_sql = $this->buildSqlScript('update', $this->table, $update_info, $condition);
+        $retval = $this->execute($update_sql, 'query', $this->_stmtParams);
         $cache_available = isset($cache_group, $cache_key, $this->cache);
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $this->cache->update($cache_key, $cache_group, $update_info, $condition);
@@ -319,8 +322,8 @@ abstract class Model {
      * @return boolean|string|int  操作失败返回 false，操作成功时，有主键值则返回主键值，无主键值返回true
      */
     public function save($insert_info = array() , $cache_group = null) {
-        $insert_sql = $this->_initializeDb()->buildSqlScript("insert", $this->table, $insert_info, array() , 'mysql', $this->getDbHandler());
-        if ($this->execute($insert_sql, 'query') && !$this->_in_transaction) {
+        $insert_sql = $this->buildSqlScript("insert", $this->table, $insert_info, array());
+        if ($this->execute($insert_sql, 'query', $this->_stmtParams) && !$this->_in_transaction) {
             $cache_key = null;
             if ($this->primary_key !== null) {
                 $insert_info[$this->primary_key] = $this->_primary_key_value = $cache_key = $this->_db->insert_id;
@@ -341,20 +344,20 @@ abstract class Model {
      * @return boolean  true or false
      */
     public function replace($replace_info = array()) {
-        $insert_sql = $this->_initializeDb()->buildSqlScript("replace", $this->table, $replace_info, array() , 'mysql', $this->getDbHandler());
-        return $this->execute($insert_sql, 'query');
+        $insert_sql = $this->buildSqlScript("replace", $this->table, $replace_info, array());
+        return $this->execute($insert_sql, 'query', $this->_stmtParams);
     }
     /**
      * 删除一条记录
-     * @@note 此操作可关联缓存 涉及事务处理
+     * @note 此操作可关联缓存 涉及事务处理
      * @param array $condition  删除条件
      * @param string $cache_key  缓存key
      * @param string $cache_group  缓存组
      * @return boolean  true or false
      */
     public function delete($condition = array() , $cache_key = 0, $cache_group = null) {
-        $delete_sql = $this->_initializeDb()->buildSqlScript('delete', $this->table, null, $condition, 'mysql', $this->getDbHandler());
-        $retval = $this->execute($delete_sql, 'query');
+        $delete_sql = $this->buildSqlScript('delete', $this->table, null, $condition);
+        $retval = $this->execute($delete_sql, 'query', $this->_stmtParams);
         $cache_available = isset($cache_group, $cache_key, $this->cache);
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $this->cache->delete($cache_key, $cache_group, $condition);
@@ -369,13 +372,13 @@ abstract class Model {
      * @return boolean  true or false
      */
     public function deleteAll($condition = array() , $cache_group = null) {
-        $delete_sql = $this->_initializeDb()->buildSqlScript('delete', $this->table, null, $condition, 'mysql', $this->getDbHandler());
-        $retval = $this->execute($delete_sql, 'query');
+        $delete_sql = $this->buildSqlScript('delete', $this->table, null, $condition);
+        $retval = $this->execute($delete_sql, 'query', $this->_stmtParams);
         $cache_available = isset($cache_group, $cache_key, $this->cache);
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $select_sql = $this->buildSqlScript('select', $this->table, array(
                 $this->primary_key
-            ) , $condition, 'mysql', $this->getDbHandler());
+            ) , $condition, 'mysql', $this->getDbo());
             $cache_keys = $this->execute($select_sql, 'col');
             foreach ($cache_keys as $cache_key) {
                 $this->cache->delete($cache_key, $cache_group, $condition);
@@ -392,13 +395,13 @@ abstract class Model {
      * @return boolean 更成成功返回true 失败返回false
      */
     public function updateAll($update_info = array() , $condition = array() , $cache_group = null) {
-        $sql = $this->_initializeDb()->buildSqlScript('update', $this->table, $update_info, $condition, 'mysql', $this->getDbHandler());
-        $retval = $this->execute($sql, 'query');
+        $sql = $this->buildSqlScript('update', $this->table, $update_info, $condition);
+        $retval = $this->execute($sql, 'query', $this->_stmtParams);
         $cache_available = isset($cache_group, $cache_key, $this->cache, $this->primary_key);
         if ($retval !== false && $cache_available && !$this->_in_transaction) {
             $select_sql = $this->buildSqlScript('select', $this->table, array(
                 $this->primary_key
-            ) , $condition, 'mysql', $this->getDbHandler());
+            ) , $condition, 'mysql', $this->getDbo());
             $cache_keys = $this->execute($select_sql, 'col');
             foreach ($cache_keys as $cache_key) {
                 $this->cache->update($cache_key, $cache_group, $update_info, $condition);
@@ -429,8 +432,9 @@ abstract class Model {
         $return_fields = isset($this->primary_key) ? array(
             $this->primary_key
         ) : '*';
-        $select_sql = $this->_initializeDb()->buildSqlScript("select", $this->table, $return_fields, $condition, 'mysql', $this->getDbHandler());
-        $result = $this->execute($select_sql, 'col');
+        $return_fields = '*';
+        $select_sql = $this->buildSqlScript("select", $this->table, $return_fields, $condition);
+        $result = $this->execute($select_sql, 'col', $this->_stmtParams);
         return (count($result) > 0);
     }
     /**
@@ -452,7 +456,7 @@ abstract class Model {
         else {
             $this->_initializeDb();
             $table_info = null;
-            $result = mysql_query('SHOW FULL COLUMNS FROM ' . $table_name, $this->getDbHandler());
+            $result = mysql_query('SHOW FULL COLUMNS FROM ' . $table_name, $this->getDbo());
             while ($row = @mysql_fetch_array($result, MYSQL_ASSOC)) {
                 $field = $row['Field'];
                 unset($row['Field']);
@@ -523,7 +527,7 @@ abstract class Model {
      * @param string $group_by GROUP BY 后的字段 一般不用
      * @return array 返回查询结果
      */
-    public function findAll($condition = array() , $return_fields = null, $order_fields = array() , $asc = true, $start = 0, $itemsPerPage = 25, $group_by = array()) {
+    public function findAll($condition = array() , $return_fields = '*', $order_fields = array() , $asc = true, $start = 0, $itemsPerPage = 25, $group_by = array()) {
         $group_by_sql = $select_sql = $limit_sql = $order_sql = '';
         if ($order_fields) {
             if (is_bool($asc)) {
@@ -543,9 +547,9 @@ abstract class Model {
         if (is_numeric($start) && $start >= 0) {
             $limit_sql = ' LIMIT ' . $start . "," . $itemsPerPage;
         }
-        $select_sql = $this->_initializeDb()->buildSqlScript("select", $this->table, $return_fields, $condition, 'mysql', $this->getDbHandler());
+        $select_sql = $this->buildSqlScript("select", $this->table, $return_fields, $condition);
         $select_sql.= $group_by_sql . $order_sql . $limit_sql;
-        return $this->execute($select_sql, 'all');
+        return $this->execute($select_sql, 'all', $this->_stmtParams);
     }
     /**
      *  获取指定条件的记录条数
@@ -554,83 +558,35 @@ abstract class Model {
      * @return int 返回查询结果条数
      */
     public function getCount($condition = '', $distinct_fields = '') {
-        $select_sql = $this->_initializeDb()->buildSqlScript("select", $this->table, 'count(1)', $condition, 'mysql', $this->getDbHandler());
+        $select_sql = $this->buildSqlScript("select", $this->table, 'count(1)', $condition);
         $group_by_sql = '';
         if ((is_array($distinct_fields) && count($distinct_fields) === 1) || (is_string($distinct_fields) && strlen($distinct_fields) > 0)) {
             $field = is_array($distinct_fields) ? '`' . implode('` `', $distinct_fields) . '`' : $distinct_fields;
-            $select_sql = $this->buildSqlScript("select", $this->table, 'count(distinct(' . $distinct_fields . '))', $condition, 'mysql', $this->getDbHandler());
+            $select_sql = $this->buildSqlScript("select", $this->table, 'count(distinct(' . $distinct_fields . '))', $condition);
         }
-        return intval($this->execute($select_sql . $group_by_sql, 'one'));
+        return intval($this->execute($select_sql . $group_by_sql, 'one', $this->_stmtParams));
     }
     /**
      * Build sql script from the arguments
      * @param string $op_type (insert select update delete replace)
      * @param string $table  the table name which will be affected
-     * @param array() $fields  which fields you want to return from select sql
-     * @param array() $where  which condition you want to set from select sql
-     * @param string $db_type database type (mysql or sqlite)
-     * @param string $dbn resource type   mysql or sqlite connect identifier
+     * @param array $fields  which fields you want to return from select sql
+     * @param array $where  which condition you want to set from select sql
      * @return string the sql string
      * @access public
      */
-    public function buildSqlScript($op_type = 'insert', $table = null, $fields = array() , $where = array() , $db_type = "mysql", $dbn = null) {
+    public function buildSqlScript($op_type = 'insert', $table = '', $fields = array() , $where = array()) {
         $sql = $where_sql = '';
         $columns = $values = array();
-        $op_type = strtolower($op_type);
-        if ((!empty($table) && $op_type == 'select') || (is_array($fields) && !empty($fields) && $op_type != 'select') || $op_type == 'delete') {
-            $escape_function = $db_type . "Escape";
-            if ($op_type !== 'insert' && $op_type !== 'replace') {
-                //处理where 条件
-                if (is_array($where) && count($where) > 0) {
-                    $count = count($where);
-                    $where_sql.= " WHERE ";
-                    $index = 0;
-                    foreach ($where as $column => $value) {
-                        $index++;
-                        if (is_array($value)) {
-                            $index1 = 0;
-                            $where_sql.= '(';
-                            foreach ($value as $k => $v) {
-                                if ($k === $index1) {
-                                    $where_sql.= " `{$column}` ='" . $this->$escape_function($v, $dbn) . "'";
-                                    $where_sql.= (count($value) > $index1 + 1) ? " OR " : " ";
-                                }
-                                else {
-                                    $where_sql.= " `{$column}` " . $k . ((strpos($v, 'select') !== false && strpos($v, 'from') !== false) ? ' ' . $v : "'" . $this->$escape_function($v, $dbn) . "'");
-                                    $where_sql.= (count($value) > $index1 + 1) ? " AND " : " ";
-                                }
-                                $index1++;
-                            }
-                            $where_sql.= ')';
-                        }
-                        else {
-                            if ($column == '&&') //如果是包含多个字段条件的字符串
-                            $where_sql.= $value;
-                            else $where_sql.= strpos($column, ')') > 0 ? "{$column}='" . $this->$escape_function($value, $dbn) . "'" : "`{$column}`='" . $this->$escape_function($value, $dbn) . "'";
-                        }
-                        $where_sql.= ($count > $index) ? " AND " : " ";
-                    }
-                    unset($count, $index, $column, $value, $where);
-                }
-                else if (is_string($where) && $where !== '') {
-                    $where_sql.= ' WHERE ' . $where;
-                    unset($where);
-                }
-            }
+        $stmt_params = array();
+        if (($table != '' && $op_type === 'select') || (!empty($fields) && $op_type !== 'select') || $op_type == 'delete') {
             switch ($op_type) {
                 case 'insert':
                 case 'replace':
                     $sql.= strtoupper($op_type) . " INTO " . $table . "";
-                    $columns = array_keys($fields);
-                    $values = array_map(array(
-                        $this,
-                        $escape_function
-                    ) , array_values($fields) , array_pad(array(
-                        $dbn
-                    ) , count($fields) , $dbn)); //这里需要修改
-                    $sql.= "(`" . implode("`,`", $columns) . "`) ";
-                    $sql.= "VALUES(" . "'" . implode("','", $values) . "')";
-                    unset($fields, $columns, $values);
+                    $sql.= "(`" . implode("`,`", array_keys($fields)) . "`) ";
+                    $sql.= "VALUES(" . "'" . implode(',', array_fill(0, count($fields) , '?')) . "')";
+                    foreach (array_values($fields) as $k => $value) $stmt_params[] = $value;
                     break;
 
                 case 'update':
@@ -639,100 +595,106 @@ abstract class Model {
                     $index = 0;
                     foreach ($fields as $column => $value) {
                         $index++;
-                        if (strpos($value, '`' . $column . '`') !== false) $sql.= "`{$column}`=" . $this->$escape_function($value, $dbn);
-                        else $sql.= "`{$column}`='" . $this->$escape_function($value, $dbn) . "'";
+                        $sql.= "`{$column}`=?";
                         $sql.= ($count > $index) ? "," : " ";
+                        $stmt_params[] = $value;
                     }
-                    unset($fields, $column, $value);
-                    $sql.= $where_sql;
                     break;
 
                 case 'select':
-                    //modify 20100614 添加对fields中count(1)或者count(*)的支持
-                    if (is_string($fields)) {
-                        $sql.= "SELECT " . ($fields === '*' || $fields === '' ? "*" : $fields) . " FROM " . $table . $where_sql;
-                    }
-                    else {
-                        if (is_array($fields) && count($fields) > 0) {
-                            //为临时兼容$fields==array('*') or array() 暂添加如下代码,待陈统筹处理   2013.6.19-shao
-                            $fields = implode(',', $fields);
-                        }
-                        elseif (is_array($fields) && count($fields) == 0) {
-                            $fields = '*';
-                        }
-                        $sql.= "SELECT " . $fields . " FROM " . $table . $where_sql;
-                    }
-                    unset($fields);
+                    if (is_string($fields)) $sql.= "SELECT " . ($fields === '*' || $fields === '' ? "*" : $fields) . " FROM " . $table . $where_sql;
+                    else $sql.= "SELECT " . !empty($fields) ? implode(',', $fields) : '*' . " FROM " . $table;
                     break;
 
                 case 'delete':
-                    $sql.= "DELETE FROM " . $table . $where_sql;
+                    $sql.= "DELETE FROM " . $table;
                     break;
 
                 default:
                     break;
                 }
+                if ($op_type !== 'insert' && $op_type !== 'replace') {
+                    //处理where 条件
+                    if (is_array($where) && count($where) > 0) {
+                        $count = count($where);
+                        $sql.= " WHERE ";
+                        $index = 0;
+                        foreach ($where as $column => $value) {
+                            $index++;
+                            if (is_array($value)) {
+                                $index1 = 0;
+                                $sql.= '(';
+                                $count = count($value);
+                                foreach ($value as $k => $v) {
+                                    if ($k === $index1) {
+                                        $sql.= " `{$column}` =?";
+                                        $sql.= ($count > $index1 + 1) ? " OR " : " ";
+                                    }
+                                    else {
+                                        $sql.= " `{$column}` " . $k . '?';
+                                        $sql.= ($count > $index1 + 1) ? " AND " : " ";
+                                    }
+                                    $stmt_params[] = $v;
+                                    $index1++;
+                                }
+                                $sql.= ')';
+                            }
+                            else {
+                                if ($column === '&&') //如果是包含多个字段条件的字符串
+                                $sql.= $value;
+                                else {
+                                    $sql.= strpos($column, ')') > 0 ? "{$column}=?" : "`{$column}`=?";
+                                    $stmt_params[] = $value;
+                                }
+                            }
+                            $sql.= ($count > $index) ? " AND " : " ";
+                        }
+                    }
+                    else if (is_string($where) && $where !== '') {
+                        $sql.= ' WHERE ' . $where;
+                    }
+                }
             }
-            return $sql.";";
-    }
-    /**
-	*  Format a mySQL string correctly for safe mySQL insert
-    *  (no mater if magic quotes are on or not)
-    * @param string $str mysql SQL串
-    * @param object $dbh mysql 数据库Handler
-    * @return string 经过escape的SQL串
-	*/
-    public function mysqlEscape($str,$dbh=null){
-        //$dbh->prepare($str);
-		return mysql_real_escape_string($str);
-		//return mysql_escape_string($str);
-	}
-	/**
-	*  Format a SQLite string correctly for safe SQLite insert
-    *  (no mater if magic quotes are on or not)
-    * @param string $str sqilte SQL串
-    * @param object $dbh 数据库Handler null
-    * @return string 经过escape的SQL串
-	*/
-	public function sqliteEscape($str,$dbh=null){
-		return sqlite_escape_string($str);
-	}
-    /**
-     *  魔术函数
-     *  (1)根据ID获取某个字段 （数据库中字段名是tag_name  这里条用就得用TagName 这样做是为了统一函数名规范）
-     *	函数第一个参数  id值，	第二个参数  可选参数，为缓存组名(cache_group)
-     *	(2)根据查询条件获取某个字段
-     *
-     *
-     * @example1 取tag_id=1对应的tag_name,
-     *		 $tag_name = $this->findTagNameById(1,'tag');
-     *
-     * @example2 根据条件获取一条记录的某个字段，必须保证该条件下只有一条记录，此时不能用缓存
-     *
-     *	    例如：取tag_id =2 的单个tag_name
-     *		$tag_name = $this->findTagName(array('tag_id'=>2));
-     *
-     * @param string $method 函数名
-     * @param array $args 参数
-     * @return  array|string  执行$method($args)的返回值
-     */
-    public function __call($method, $args) {
-        if (substr($method, 0, 4) === 'find' && $method !== 'find' && $method !== "findById") {
-            if (substr($method, -4) === 'ById') {
-                $field_name = word_underscore(substr($method, 4, -4));
-                $result = $this->findById($args[0], array(
-                    $field_name
-                ) , isset($args[1]) ? $args[1] : null);
-            }
-            else {
-                $field_name = word_underscore(substr($method, 4));
-                $result = $this->find($args[0], array(
-                    $field_name
-                ) , isset($args[1]) ? $args[1] : null, isset($args[2]) ? $args[2] : null);
-            }
-            if (empty($result)) return null;
-            return $result[$field_name];
+            $this->_stmtParams = $stmt_params;
+            return $sql;
         }
-        throw new Exception('Model::__call(): method ' . $method . ' of  ' . get_class($this) . ' dose not exists, exiting.');
+        /**
+         *  魔术函数
+         *  (1)根据ID获取某个字段 （数据库中字段名是tag_name  这里条用就得用TagName 这样做是为了统一函数名规范）
+         *	函数第一个参数  id值，	第二个参数  可选参数，为缓存组名(cache_group)
+         *	(2)根据查询条件获取某个字段
+         *
+         *
+         * @example1 取tag_id=1对应的tag_name,
+         *		 $tag_name = $this->findTagNameById(1,'tag');
+         *
+         * @example2 根据条件获取一条记录的某个字段，必须保证该条件下只有一条记录，此时不能用缓存
+         *
+         *	    例如：取tag_id =2 的单个tag_name
+         *		$tag_name = $this->findTagName(array('tag_id'=>2));
+         *
+         * @param string $method 函数名
+         * @param array $args 参数
+         * @return  array|string  执行$method($args)的返回值
+         */
+        public function __call($method, $args) {
+            if (substr($method, 0, 4) === 'find' && $method !== 'find' && $method !== "findById") {
+                if (substr($method, -4) === 'ById') {
+                    $field_name = word_underscore(substr($method, 4, -4));
+                    $result = $this->findById($args[0], array(
+                        $field_name
+                    ) , isset($args[1]) ? $args[1] : null);
+                }
+                else {
+                    $field_name = word_underscore(substr($method, 4));
+                    $result = $this->find($args[0], array(
+                        $field_name
+                    ) , isset($args[1]) ? $args[1] : null, isset($args[2]) ? $args[2] : null);
+                }
+                if (empty($result)) return null;
+                return $result[$field_name];
+            }
+            throw new Exception('Model::__call(): method ' . $method . ' of  ' . get_class($this) . ' dose not exists, exiting.');
+        }
     }
-}
+    

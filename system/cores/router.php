@@ -23,40 +23,11 @@
  * URL and the function executed to perform a request. The router determines
  * which function to execute for a given URL.
  *
- * <code>
- * $router = new \Igniter\Router;
- *
- * // Adding a basic route
- * $router->route( '/login', 'login_function' );
- *
- * // Adding a route with a named alphanumeric capture, using the <:var_name> syntax
- * $router->route( '/user/view/<:username>', 'view_username' );
- *
- * // Adding a route with a named numeric capture, using the <#var_name> syntax
- * $router->route( '/user/view/<#user_id>', array( 'UserClass', 'view_user' ) );
- *
- * // Adding a route with a wildcard capture (Including directory separtors), using
- * // the <*var_name> syntax
- * $router->route( '/browse/<*categories>', 'category_browse' );
- *
- * // Adding a wildcard capture (Excludes directory separators), using the
- * // <!var_name> syntax
- * $router->route( '/browse/<!category>', 'browse_category' );
- *
- * // Adding a custom regex capture using the <:var_name|regex> syntax
- * $router->route( '/lookup/zipcode/<:zipcode|[0-9]{5}>', 'zipcode_func' );
- *
- * // Specifying priorities
- * $router->route( '/users/all', 'view_users', 1 ); // Executes first
- * $router->route( '/users/<:status>', 'view_users_by_status', 100 ); // Executes after
- *
- * // Specifying a default callback function if no other route is matched
- * $router->default_route( 'page_404' );
- *
- * // Run the router
- * $router->execute();
- * </code>
- *
+ * @example1  '/user/view/(?P<username>[A-Za-z0-9\-\_]+)'=> array('user','view_username',)//匹配字母,数字,下划线,中划线
+ * @example2  '/user/view/(?P<userid>[0-9]+)'=> array( 'UserClass', 'view_user' )//匹配数字
+ * @example3  '/browse/(?P<category>[^\/]+)' => array('browse','browse_category') //除了"/"之外的所有匹配
+ * @example4  '/api/(?P<method>[A-Za-z.]+)' => array('browse','<method>') 动态方法绑定，方法名即为 匹配到的 $method
+ * @example5  '/browse/(?P<category>[^\/]+)' => array('admin/browse','browse_category') //除了"/"之外的所有匹配 其中admin是module名 *
  * @since 2.0.0
  */
 class Router {
@@ -251,9 +222,9 @@ class Router {
         }
         //hack by chenjin 20130317 check if the router is for the controller class
         $tmp = substr($this->callback[0],strlen(self::$module)+1);
-        self::$controller = strtolower();
+        self::$controller = strtolower($tmp);
         self::$action = $this->callback[1];
-        $real_controller_name = ucfirst(substr($this->callback[0],strlen(self::$module)+1))."_Controller";
+        $real_controller_name = ucfirst($tmp)."_Controller";
         $function_return = call_user_func_array(array(
             new $real_controller_name,
             self::$action
@@ -291,38 +262,8 @@ class Router {
      * @return boolean True if the route was added, false if it was not (If a conflict occured)
      */
     public function route($routes) {
-        //$new_routes = array_map(array($this,'__route_tidy_preg'),$routes);
         $this->routes = $routes;
-        //$this->routes = array_combine($new_routes,$callbacks);
-        //$this->routes_original[$priority] = array_combine($new_routes,$routes);
         return $this;
-    }
-    /**
-     * Retrieves the perl regular expression of $route
-     *
-     *
-     * @add by chenjin 20130324
-     * @access protected
-     *
-     * @param string $route The "dirty" $route
-     *
-     * @return string The tidy perl expression
-     */
-    function __route_tidy_preg($route) {
-        // Make sure the route ends in a / since all of the URLs will
-        //$route = rtrim( $route, '/' ) . '/';
-        // Custom capture, format: <:var_name|regex>
-        //strpos($route,':') !== false && $route = preg_replace( '/\<\:(.*?)\|(.*?)\>/', '(?P<\1>\2)', $route );
-        // Alphanumeric capture (0-9A-Za-z-_), format: <:var_name>
-        //strpos($route,'<:') !== false && $route = preg_replace( '/\<\:(.*?)\>/', '(?P<\1>[A-Za-z0-9\-\_]+)', $route );
-        // Numeric capture (0-9), format: <#var_name>
-        //strpos($route,'#') !== false && $route = preg_replace( '/\<\#(.*?)\>/', '(?P<\1>[0-9]+)', $route );
-        // Wildcard capture (Anything INCLUDING directory separators), format: <*var_name>
-        //$route = preg_replace( '/\<\*(.*?)\>/', '(?P<\1>.+)', $route );
-        // Wildcard capture (Anything EXCLUDING directory separators), format: <!var_name>
-        //strpos($route,'!') !== false && $route = preg_replace( '/\<\!(.*?)\>/', '(?P<\1>[^\/]+)', $route );
-        // Add the regular expression syntax to make sure we do a full match or no match
-        return '#^' . $route . '$#';
     }
     /**
      * Retrieves the part of the URL after the base (Calculated from the location

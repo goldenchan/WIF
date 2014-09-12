@@ -227,38 +227,6 @@ abstract class Controller {
         $this->content_type = $type;
     }
     /**
-     * 请求输出另外一个控制器的action的模版
-     *
-     * @deprecated
-     * @param string  $controller  The new Controller name
-     * @param string $action The new action name to be redirected to
-     * @param array $args Any parameters passed to this method will be passed as
-     *               parameters to the new action.
-     * @return mixed the function result, or FALSE on error
-     * @access protected
-     */
-    protected function requestAction($controller = '', $action = '', $args = array()) {
-        if ($this->name === $controller) {
-            $controller_obj = $this;
-            $controller_obj->action = $action;
-        }
-        else {
-            $name = $controller . 'Controller';
-            $controller_obj = new $name(array(
-                'name' => $controller,
-                'action' => $action
-            ));
-        }
-        $controller_obj->post_data = null;
-        $controller_obj->params_data = null;
-        $controller_obj->router_params = $args;
-        ob_clean();
-        call_user_func(array(&$controller_obj,
-            $action
-        ) , $args);
-        exit(0);
-    }
-    /**
      * 用api 的方式 执行action 忽略掉GET POST FILE 的参数
      * @param string  $controller  当前模块下的控制器名 不可以跨模块调用
      * @param string $action 要执行的函数 action名
@@ -303,18 +271,6 @@ abstract class Controller {
     protected function redirect($path = '/') {
         ob_clean();
         header('Location:' . $path);
-    }
-    /**
-     * Tells the browser not to cache the results of the current request by sending headers
-     *
-     * @access protected
-     */
-    protected function disableHttpCache() {
-        $this->view()->addHeaderResponse("Expires: Sun, 17 Mar 2013 05:00:00 GMT");
-        $this->view()->addHeaderResponse("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        $this->view()->addHeaderResponse("Cache-Control: no-store, no-cache, must-revalidate");
-        $this->view()->addHeaderResponse("Cache-Control: post-check=0, pre-check=0");
-        $this->view()->addHeaderResponse("Pragma: no-cache");
     }
     /**
      * 处理跳转提示

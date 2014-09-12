@@ -185,7 +185,7 @@ function newModel($model_name = "users") {
      * @see WI_CONFIG::$dbs
      */
     
-    var $dbs = "default";
+    var $_dsn = "default";
     /**
      * 无前缀的表名
      * @var string

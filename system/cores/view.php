@@ -117,7 +117,7 @@ class View {
         $this->_cacheData = $cacheData;
         $this->_charset = 'utf-8';
         $this->_headers = Array();
-        $this->_default_template = isset(WI_CONFIG::$default_template_class) ? WI_CONFIG::$default_template_class : $this->$_default_template;
+        $this->_default_template = isset(WI_CONFIG::$default_template_class) ?WI_CONFIG::$default_template_class: $this->$_default_template;
         // let's send an HTTP 200 header response... If somebody wants to overwrite it later
         // on, php should keep in mind that the valid one will be the last one so it is
         // fine to do this more than once and twice
@@ -224,53 +224,6 @@ class View {
         // build up the header and send it
         $header = "Content-Type: " . $this->_contentType . ";charset=" . $this->_charset;
         header($header);
-        return true;
-    }
-    /**
-     *
-     * 设置错误提示信息
-     *@deprecated
-     *
-     * @param string $message 错误提示
-     * @return boolean true
-     */
-    public function setErrorMessage($message) {
-        $this->setValue("viewErrorMessage", $message);
-        $this->setError(true);
-        return true;
-    }
-    /**
-     * Whether the view has to show some error message or not. Views can
-     * show success messages as well as error messages at the same time.
-     *
-     * @deprecated
-     * @param boolean $error true or false
-     * @return boolean true
-     */
-    public function setError($error = true) {
-        $this->setValue("viewIsError", $error);
-        return true;
-    }
-    /**
-     * Whether the view has to show some success message or not. Views can show
-     * sucess messages as well as error messages as the same time!
-     * @deprecated
-     * @param boolean $success true or false
-     * @return boolean true
-     */
-    public function setSuccess($success = true) {
-        $this->setValue("viewIsSuccess", $success);
-        return true;
-    }
-    /**
-     * sets an success message for the whole form, should that be needed
-     * @deprecated
-     * @param string $message true or false
-     * @return boolean true
-     */
-    public function setSuccessMessage($message) {
-        $this->setValue("viewSuccessMessage", $message);
-        $this->setSuccess(true);
         return true;
     }
     /**

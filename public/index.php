@@ -28,6 +28,6 @@ require dirname(__DIR__) . DS . 'configs' . DS .'app_config.php';
 require APP_ROOT_PATH  . "bootstrap.php";
 $router = new Router;
 $router->route(WI_CONFIG::$routes)->default_route(array(
-    'Default',
+    'default/Default',
     'error404'
 ))->execute();
