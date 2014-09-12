@@ -250,10 +250,10 @@ class Router {
             return FALSE;
         }
         //hack by chenjin 20130317 check if the router is for the controller class
-        self::$controller = ucfirst(substr($this->callback[0],strlen(self::$module)+1));
+        $tmp = substr($this->callback[0],strlen(self::$module)+1);
+        self::$controller = strtolower();
         self::$action = $this->callback[1];
-        $real_controller_name = self::$controller."_Controller";
-        self::$controller = strtolower(self::$controller);
+        $real_controller_name = ucfirst(substr($this->callback[0],strlen(self::$module)+1))."_Controller";
         $function_return = call_user_func_array(array(
             new $real_controller_name,
             self::$action

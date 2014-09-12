@@ -299,7 +299,7 @@ abstract class Model {
      * @param array  $condition   更新条件
      * @param string $cache_key  缓存key
      * @param string $cache_group  缓存组
-     * @return boolean  true or false
+     * @return boolean|int 成功则返回影响的行数, 失败返回false
      */
     public function update($update_info = array() , $condition = array() , $cache_key = null, $cache_group = null) {
         $update_sql = $this->_initializeDb()->buildSqlScript('update', $this->table, $update_info, $condition, 'mysql', $this->getDbHandler());
