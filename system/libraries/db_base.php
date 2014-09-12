@@ -30,7 +30,7 @@ class Db_Base {
      * @return Returns a reference to a PDb driver, with a working connection to the database.
      */
     public static function getDb($dsn,$user,$password) {
-        if( !isset( self::$db[$dsn] ) || self::$db[$dsn] == null) {
+        if( !isset( self::$db[$dsn] )) {
             include_once __DIR__ . DS . 'baselib' . DS . "class.wi_pdo.php";
             self::$db[$dsn] = new WI_PDO(WI_CONFIG::$dbs[$dsn]['dsn'], WI_CONFIG::$dbs[$dsn]['user'], WI_CONFIG::$dbs[$dsn]['password']);
             self::$db[$dsn]->from_disk_cache = false;
