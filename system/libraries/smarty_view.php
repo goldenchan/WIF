@@ -91,7 +91,7 @@ class Smarty_View {
      * @param string $dir 模版目录
      */
     function setTemplateDir($dir) {
-        $this->_templateObject->setTemplateDir(APP_ROOT_PATH . "templates" . DS .$this->module.DS.$dir);
+        $this->_templateObject->setTemplateDir(APP_ROOT_PATH . "templates" . DS .$this->_module.DS.$dir);
     }
     /**
      * 设置模版文件
