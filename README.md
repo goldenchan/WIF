@@ -53,5 +53,4 @@ WI PHP Framework
             |   |   |-- plugins
             |   |   `-- sysplugins
             |   |-- Snoopy snoopy类
-            |   `-- ez_sql ez_sql类
             `-- cache 缓存处理类
