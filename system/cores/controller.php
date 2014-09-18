@@ -158,7 +158,7 @@ abstract class Controller {
      * @return object
      * @access protected
      */
-    public function model($model_name) {
+    protected function model($model_name) {
         if (!isset($this->model_objects[$model_name])) {
             //include_once APP_ROOT_PATH."models".DS.word_underscore($model_name).'_model.php';
             $model_class_name = ucfirst($model_name) . '_Model';
@@ -179,7 +179,7 @@ abstract class Controller {
      * @return object
      * @access public
      */
-    public function helper($helper_name) {
+    protected function helper($helper_name) {
         $this->setIncludePath();
         if (!isset($this->help_objects[$helper_name])) {
             $helper_class_name = ucfirst($helper1) . '_Helper';
@@ -196,7 +196,7 @@ abstract class Controller {
      *
      * @access public
      */
-    public function view($reload = false) {
+    protected function view($reload = false) {
         if (!isset($this->_view) || $reload) {
             if ($this->content_type === 'text/html') {
                 $tpl_path = $this->name;

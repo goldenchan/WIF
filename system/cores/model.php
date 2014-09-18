@@ -247,7 +247,7 @@ abstract class Model {
         $cache_available && $result = $this->cache->get($cache_key, $cache_group, $condition);
         if (empty($result)) {
             $select_sql = $this->buildSqlScript("select", $this->table, '*', $condition);
-            $result = $this->execute($select_sql, 'row');
+            $result = $this->execute($select_sql, 'row',$this->_stmtParams);
             if (!empty($result) && $cache_available) {
                 $this->cache->set($cache_key, $cache_group, $result);
             }
@@ -402,7 +402,7 @@ abstract class Model {
             $select_sql = $this->buildSqlScript('select', $this->table, array(
                 $this->primary_key
             ) , $condition);
-            $cache_keys = $this->execute($select_sql, 'col');
+            $cache_keys = $this->execute($select_sql, 'col', $this->_stmtParams);
             foreach ($cache_keys as $cache_key) {
                 $this->cache->update($cache_key, $cache_group, $update_info, $condition);
             }
